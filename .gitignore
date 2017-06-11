@@ -1,0 +1,16 @@
+.classpath
+.gradle
+.project
+.settings
+bin
+build
+gradle
+gradlew
+gradlew.bat
+libs
+external-libs/jlapack-0.8/CHANGES
+external-libs/jlapack-0.8/INSTALL
+external-libs/jlapack-0.8/README
+external-libs/jlapack-0.8/blas_simple.jar
+external-libs/jlapack-0.8/examples/
+external-libs/jlapack-0.8/lapack_simple.jar

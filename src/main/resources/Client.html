@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Laplace</title>
+<link rel="stylesheet" href="index.css">
+<script src="js/three.min.js"></script>
+<script src="js/OrbitControls.js"></script>
+
+</head>
+<body>
+
+	<div id="canvas-3d"></div>
+	<canvas id="canvas-2d-vals"></canvas>
+	<canvas id="canvas-2d-vect"></canvas>
+
+	<script>
+		const UPDATE_INTERVAL = 150;
+		const MESH_SIZE = 300 ;
+		
+		var nextTimeGetData = 1;
+		var responseMessage  ;
+
+		var scene;
+		var camera;
+		var controls;
+		var renderer;
+		var mesh;
+		var texture;
+		var sortEigenvectors = false ;
+		var eigenvalueIndex = -1 ;
+		
+		var EXECS = 100 ;
+		
+		const material = new THREE.MeshStandardMaterial({
+			side : THREE.DoubleSide,
+			opacity : 1.0,
+			color : 0xffffff,
+			wireframe : false,
+			metalness : 0.65,
+			roughness : 0.3
+		});
+		
+		const canvas3d = document.getElementById("canvas-3d");
+		const canvas2dVals = document.getElementById("canvas-2d-vals");
+		const canvas2dVect = document.getElementById("canvas-2d-vect");
+
+		function processData() {
+			if (this.status === 200) {
+				responseMessage = JSON.parse(this.responseText);
+				
+				let geometry = new THREE.ParametricBufferGeometry(
+						graphFunction, MESH_SIZE, MESH_SIZE );
+
+				if( !mesh ) {
+					mesh = new THREE.Mesh(geometry, material);
+					scene.add( mesh ) ;
+				} else {
+					mesh.geometry = geometry ;
+				}
+
+				canvas3d.width = canvas3d.width ;
+
+				render() ;
+				
+				plotValues() ;
+				plotVector() ;
+			}
+
+			nextTimeGetData = Date.now() + UPDATE_INTERVAL;
+		}
+
+		const xhr = new XMLHttpRequest();
+		xhr.addEventListener("load", processData);
+
+		function getData() {
+			let now = Date.now();
+			if( EXECS>0 && nextTimeGetData && now > nextTimeGetData) {
+				nextTimeGetData = null ;
+				--EXECS ;
+				
+				xhr.open("GET", "/data");
+				xhr.send();
+			}
+		}
+
+		var clientWidth  ;
+		var clientHeight ;
+
+		function resize() {
+			clientWidth = window.innerWidth / 2 ;
+			clientHeight = window.innerHeight / 2 ;
+			
+			canvas3d.width = clientWidth ;
+			canvas3d.height = clientHeight ;
+			
+			canvas2dVals.width = clientWidth ;
+			canvas2dVals.height = clientHeight ;
+
+			canvas2dVect.width = clientWidth ;
+			canvas2dVect.height = clientHeight ;
+
+			camera.aspect = clientWidth / clientHeight;
+			camera.updateProjectionMatrix();
+
+			renderer.setSize(clientWidth, clientHeight);
+			getData();
+		}
+
+		window.addEventListener("resize", function() {
+			resize();
+		});
+
+		window.addEventListener("load", function() {
+			init();
+			resize();
+			animate();
+		});
+
+		
+		function graphFunction(u, v) {
+			if( !responseMessage ) return new THREE.Vector3(0,0,0);
+			
+			let c = Math.floor( u * (responseMessage.N-1) ) ;
+			let r = Math.floor( v * (responseMessage.N-1) ) ;
+			
+			let y = clientHeight 
+					* responseMessage.surface[ c*responseMessage.N + r ] 
+					- clientHeight / 2;
+
+			let z = v * clientWidth - clientWidth / 2;
+			let x = u * clientWidth - clientWidth / 2;
+			
+			return new THREE.Vector3(x, y, z);
+		}
+
+
+//		const loader = new THREE.TextureLoader();
+
+		function init() {
+//			texture = loader.load("chessboard.jpg");
+
+			scene = new THREE.Scene();
+
+			camera = new THREE.PerspectiveCamera(75, window.innerWidth
+					/ window.innerHeight, 1, 10000);
+			camera.position.z = 1200;
+
+			const light1 = new THREE.AmbientLight(0xffffff, .2);
+			scene.add(light1);
+
+			const light2 = new THREE.DirectionalLight(0xff0000, 1.0);
+			light2.position.set(1000, 1700, 0);
+			scene.add(light2);
+
+			const light3 = new THREE.DirectionalLight(0x0000ff, 1.0);
+			light3.position.set(-1000, 1700, 0);
+			scene.add(light3);
+
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+
+			canvas3d.appendChild(	renderer.domElement ) ;
+
+			controls = new THREE.OrbitControls(camera, renderer.domElement);
+			controls.addEventListener('change', render);
+			
+			canvas2dVect.addEventListener('click', function() {
+				sortEigenvectors = !sortEigenvectors ;
+				if( !sortEigenvectors ) {
+					sortOrder = null ; 
+				}
+				plotVector() ;
+			});
+			
+			canvas2dVals.addEventListener('click', function(evt) {
+				var x = evt.offsetX  ;
+				const w = clientWidth - 50 ;
+				x = ( x - 25 ) * responseMessage.eigenvalues.length / w ; 
+				eigenvalueIndex = ( x >=0 && x<responseMessage.eigenvalues.length ) ?
+						Math.floor( x ) : -1 ;
+				plotValues() ;
+				plotVector() ;
+			});
+
+		}
+
+		function animate() {
+			requestAnimationFrame(animate);
+			controls.update();
+			getData();
+		}
+
+		function render() {
+			renderer.render(scene, camera);
+		}
+		
+		
+		function plotValues() {
+		
+			canvas2dVals.width = canvas2dVals.width ;
+
+			if( !responseMessage || responseMessage.eigenvalues.length==0 ) return ;
+
+			const h = clientHeight - 50 ;
+			const w = clientWidth - 50 ;
+			
+			let mn = responseMessage.eigenvalues[0] ;
+			let mx = mn ;
+			
+			for( let i=1 ; i<responseMessage.eigenvalues.length ; i++ ) {
+				mn = Math.min( responseMessage.eigenvalues[i], mn ) ;
+				mx = Math.max( responseMessage.eigenvalues[i], mx ) ;				
+			}
+			const range = mx - mn ;
+			
+			const ctx=canvas2dVals.getContext("2d") ;
+			
+			var y = h - ( ( responseMessage.eigenvalues[0] - mn ) / range * h ) ;
+			var x = 0 ;
+			
+			ctx.beginPath();
+			ctx.strokeStyle="#2060a0" ;
+			ctx.lineWidth = 2 ;
+			ctx.moveTo( x+25, y+25 );
+			
+			for( let i=1 ; i<responseMessage.eigenvalues.length ; i++ ) {
+				y = h - ( ( responseMessage.eigenvalues[i] - mn ) / range * h ) ;
+				x = ( i / responseMessage.eigenvalues.length ) * w ;				
+				ctx.lineTo( x+25, y+25 );
+			}
+			ctx.stroke();
+			
+			ctx.beginPath();
+			ctx.fillStyle="#3060a0" ;
+
+			if( eigenvalueIndex >= 0 ) {
+				y = h - ( ( responseMessage.eigenvalues[eigenvalueIndex] - mn ) / range * h ) ;
+				x = ( eigenvalueIndex / responseMessage.eigenvalues.length ) * w ;
+				ctx.arc(x+25,y+25,5,0,2*Math.PI);
+			}
+			ctx.fill();
+		}
+
+		var sortOrder = null ;
+		function plotVector() {
+		
+			canvas2dVect.width = canvas2dVect.width ;
+
+			if( !responseMessage || responseMessage.eigenvectors.length==0 ) return ;
+
+			const h = clientHeight - 50 ;
+			const w = clientWidth - 50 ;
+
+			var st = eigenvalueIndex - 5 ;
+			if( st<0 ) st = 0 ;
+			if( st>=responseMessage.N ) st = responseMessage.N - 11 ;  
+			var ed = st + 10 ;
+
+			let mn = responseMessage.eigenvectors[responseMessage.N*st] ;
+			let mx = mn ;
+			
+			for( let i=st ; i<ed ; i++ ) {
+				for( let j=0 ; j<responseMessage.N; j++ ) {
+					mn = Math.min( responseMessage.eigenvectors[responseMessage.N*i+j], mn ) ;
+					mx = Math.max( responseMessage.eigenvectors[responseMessage.N*i+j], mx ) ;
+				}
+			}
+			const range = mx - mn ;
+			
+			const ctx=canvas2dVect.getContext("2d") ;
+			
+			var color = 0x603020 ;
+			
+			
+			for( let n=st ; n<ed ; n++ ) {
+
+				const start = responseMessage.N * n ;
+				var data = responseMessage.eigenvectors
+							.slice( start, start+responseMessage.N  )
+							;
+				if( sortEigenvectors ) {
+					data = data.map( function(e,i) { return {x:e, i:i } ; } ) ;
+					data = data.sort( function(a, b){return a.x-b.x} ) ;
+					sortOrder = data.map( function(e) { return e.i ; } ) ;
+					data = data.map( function(e) { return e.x ; } ) ;					
+				} 
+				
+				var x = 0 ;
+				var y = h - ( ( data[0] - mn ) / range * h ) ;
+				
+				color += 0x806020 ;
+				let cc = "000000" + color.toString(16) ;
+				
+				ctx.beginPath();
+				ctx.strokeStyle="#" + cc.substring( cc.length-8 ) ;
+				ctx.lineWidth = 1 ;
+				ctx.moveTo( x+25, y+25 );
+
+				for( let i=1 ; i<data.length ; i++ ) {
+					x = ( i / responseMessage.N ) * w ;				
+					y = h - ( ( data[i] - mn ) / range * h ) ;
+					ctx.lineTo( x+25, y+25 );
+				}
+				ctx.stroke();
+				
+			}
+		}
+
+	</script>
+
+
+</body>
+</html>

@@ -1,0 +1,167 @@
+@CHARSET "UTF-8";
+
+html {
+	margin: 0 ;
+	padding: 0 ;
+	color: #28b1f3 ;
+	background-color: #201864 ;
+	font-family: 'arial' ;
+	overflow: hidden ;
+}
+
+body {
+	margin: 0 ;
+	padding: 0 ;
+}
+
+#params {
+	position: absolute ;
+	top: 0 ;
+	left: 0 ;
+	z-index: 100 ;
+}
+
+
+.network line {
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+
+.network circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+
+.net-view {
+	overflow: hidden ;
+	position: absolute ;
+	padding: 0 ;
+	margin: 0 ;
+	bottom: 0 ;
+	left: 0 ;
+	right: 0 ;
+	top: 150px ;
+	background-color: #1f0c45 ;	
+}
+
+.menu {
+	position: relative ;
+}
+
+.drop-site {
+	position: absolute ;
+	border: dashed 3px grey ;
+	width: 100px ;
+	height: 100px ;
+	color: silver ;
+	text-align: center ;
+	display: table-cell; 
+	vertical-align: middle;
+	padding: 15px ;
+	margin: 0 ; 
+}
+
+.drop-hover {
+	border: dashed 3px black !important;
+}
+
+.controls {
+	position: absolute ;
+	top: 0 ;
+	left: 200px ;
+}
+
+.stages {
+	position: absolute ;
+	top: 0 ;
+	right: 0 ;
+}
+
+.slider-label {
+	width: 100px ;
+	text-align: left ;
+	font-size: 10pt ;
+}
+
+
+input[type=range] {
+    /*removes default webkit styles*/
+    -webkit-appearance: none;
+    
+    /*fix for FF unable to apply focus style bug */
+    border: 1px solid #201864;
+    
+    /*required for proper track sizing in FF*/
+    width: 200px;
+}
+input[type=range]::-webkit-slider-runnable-track {
+    width: 200px;
+    height: 2px;
+    background: #ddd;
+    border: none;
+    border-radius: 1px;
+}
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border: none;
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+    background: goldenrod;
+    margin-top: -4px;
+}
+input[type=range]:focus {
+    outline: none;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+    background: #ccc;
+}
+
+input[type=range]::-moz-range-track {
+    width: 200px;
+    height: 2px;
+    background: #ddd;
+    border: none;
+    border-radius: 1px;
+}
+input[type=range]::-moz-range-thumb {
+    border: none;
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+    background: goldenrod;
+}
+
+/*hide the outline behind the border*/
+input[type=range]:-moz-focusring{
+    outline: 1px solid white;
+    outline-offset: -1px;
+}
+
+
+#canvas-3d {
+	position: absolute ;
+	top: 0 ;
+	left: 0 ;
+	width: 50% ;
+	height: 50% ;
+	z-index: 100 ;
+}
+
+#canvas-2d-vals {
+	position: absolute ;
+	top: 0 ;
+	right: 0 ;
+	width: 50% ;
+	height: 50% ;
+}
+
+#canvas-2d-vect {
+	position: absolute ;
+	bottom: 0 ;
+	left: 0 ;
+	width: 50% ;
+	height: 50% ;
+}
+
