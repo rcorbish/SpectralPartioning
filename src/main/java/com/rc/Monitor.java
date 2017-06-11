@@ -32,7 +32,7 @@ public class Monitor implements AutoCloseable {
 	final Laplace laplace ;
 	final Graph graph ;
 	
-	final int N = 100 ;
+	final int N = 250 ;
 	{
 		gson = new Gson();
 		random = new Random() ;	

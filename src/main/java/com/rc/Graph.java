@@ -1,5 +1,8 @@
 package com.rc;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 import org.netlib.lapack.Dsygv;
@@ -22,11 +25,40 @@ public class Graph {
 		edges = new int[E][2];
 		this.N = N ;
 
+		List<Integer> ixt = new ArrayList<>() ;
+		for( int i=0 ; i<N ; i++ ) ixt.add(i) ;
+		Collections.shuffle(ixt);
+		int ix[] = new int[N] ;
+		for( int i=0 ; i<N ; i++ ) ix[i] = ixt.get(i) ;
+		
+		int group1 = 0 ;
+		int group2 = N / 3  ;
+		int group3 = 2 * N / 3 ;
+		
 		for (int i = 0; i < E; i++ ) {
-			edges[i][0] = 4 * random.nextInt( N/4 ) ;
-			do { 
-				edges[i][1] = 2 * random.nextInt( N/2 ) + 1 ;
-			} while( edges[i][1] == edges[i][0] ) ;
+			float f = random.nextFloat() ; 
+			if( f < 0.05f ) {
+				edges[i][0] = ix[ random.nextInt( N/3 ) + group1 ] ;
+				edges[i][1] = ix[ random.nextInt( N/3 ) + group2 ] ;				
+			} else if( f < 0.1f ) {
+				edges[i][0] = ix[ random.nextInt( N/3 ) + group2 ] ;
+				edges[i][1] = ix[ random.nextInt( N/3 ) + group3 ] ;				
+			} else if( f < 0.5f ) {
+				edges[i][0] = ix[ random.nextInt( N/3 ) + group1 ] ;
+				do { 
+					edges[i][1] = ix[ random.nextInt( N/3 ) + group1 ] ;
+				} while( edges[i][1] == edges[i][0] ) ;				
+			} else if( f < 0.8f ) {
+				edges[i][0] = ix[ random.nextInt( N/3 ) + group2 ] ;
+				do { 
+					edges[i][1] = ix[ random.nextInt( N/3 ) + group2 ] ;
+				} while( edges[i][1] == edges[i][0] ) ;				
+			} else {
+				edges[i][0] = ix[ random.nextInt( N/3 ) + group3 ] ;
+				do { 
+					edges[i][1] = ix[ random.nextInt( N/3 ) + group3 ] ;
+				} while( edges[i][1] == edges[i][0] ) ;				
+			}
 		}
 		
 		adjacency 		= new int[N*N] ;
@@ -67,7 +99,7 @@ public class Graph {
 
 	public synchronized double[] eigenValues( double[] v ) {
 
-		int itype = 1;
+		int itype = 2;
 		
 		String jobz = "V" ;
 		String uplo = "U" ;
