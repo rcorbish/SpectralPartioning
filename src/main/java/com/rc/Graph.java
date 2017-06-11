@@ -18,20 +18,14 @@ public class Graph {
 
 	public Graph( int N ) {
 		random = new Random( 783 ) ;
-		int E = N * 10_000 ;
+		int E = N * 33_000 ;
 		edges = new int[E][2];
 		this.N = N ;
 
-		for (int i = 0; i < E; i+=2) {
-			edges[i][0] = 2 * random.nextInt( N/4 ) ;
+		for (int i = 0; i < E; i++ ) {
+			edges[i][0] = 4 * random.nextInt( N/4 ) ;
 			do { 
-				edges[i][1] = 2 * random.nextInt( N/4 ) + 1 ;
-			} while( edges[i][1] == edges[i][0] ) ;
-		}
-		for (int i = 1; i < E; i+=2) {
-			edges[i][0] = N/4 + 3 * random.nextInt( N/4 ) ;
-			do { 
-				edges[i][1] = N/4 + 3 * random.nextInt( N/4 ) + 1 ;
+				edges[i][1] = 2 * random.nextInt( N/2 ) + 1 ;
 			} while( edges[i][1] == edges[i][0] ) ;
 		}
 		
