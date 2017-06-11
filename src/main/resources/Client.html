@@ -13,6 +13,7 @@
 	<div id="canvas-3d"></div>
 	<canvas id="canvas-2d-vals"></canvas>
 	<canvas id="canvas-2d-vect"></canvas>
+	<canvas id="canvas-2d-clus"></canvas>
 
 	<script>
 		const UPDATE_INTERVAL = 150;
@@ -28,7 +29,7 @@
 		var mesh;
 		var texture;
 		var sortEigenvectors = false ;
-		var eigenvalueIndex = -1 ;
+		var eigenvalueIndex = 5 ;
 		
 		var EXECS = 100 ;
 		
@@ -44,6 +45,7 @@
 		const canvas3d = document.getElementById("canvas-3d");
 		const canvas2dVals = document.getElementById("canvas-2d-vals");
 		const canvas2dVect = document.getElementById("canvas-2d-vect");
+		const canvas2dClus = document.getElementById("canvas-2d-clus");
 
 		function processData() {
 			if (this.status === 200) {
@@ -65,6 +67,7 @@
 				
 				plotValues() ;
 				plotVector() ;
+				plotCluster() ;
 			}
 
 			nextTimeGetData = Date.now() + UPDATE_INTERVAL;
@@ -75,11 +78,11 @@
 
 		function getData() {
 			let now = Date.now();
-			if( EXECS>0 && nextTimeGetData && now > nextTimeGetData) {
+			if(  nextTimeGetData && now > nextTimeGetData) {
 				nextTimeGetData = null ;
 				--EXECS ;
 				
-				xhr.open("GET", "/data");
+				xhr.open("GET", "/data/" + eigenvalueIndex ) ;
 				xhr.send();
 			}
 		}
@@ -100,11 +103,17 @@
 			canvas2dVect.width = clientWidth ;
 			canvas2dVect.height = clientHeight ;
 
+			canvas2dClus.width = clientWidth ;
+			canvas2dClus.height = clientHeight ;
+
 			camera.aspect = clientWidth / clientHeight;
 			camera.updateProjectionMatrix();
 
 			renderer.setSize(clientWidth, clientHeight);
 			getData();
+			plotValues() ;
+			plotVector() ;
+			plotCluster() ;
 		}
 
 		window.addEventListener("resize", function() {
@@ -112,6 +121,27 @@
 		});
 
 		window.addEventListener("load", function() {
+			
+			canvas2dVect.addEventListener('click', function() {
+				sortEigenvectors = !sortEigenvectors ;
+				if( !sortEigenvectors ) {
+					sortOrder = null ; 
+				}
+				plotVector() ;
+				plotCluster() ;
+			});
+			
+			canvas2dVals.addEventListener('click', function(evt) {
+				var x = evt.offsetX  ;
+				const w = clientWidth - 50 ;
+				x = ( x - 25 ) * responseMessage.eigenvalues.length / w ; 
+				eigenvalueIndex = ( x >=0 && x<responseMessage.eigenvalues.length ) ?
+						Math.floor( x ) : -1 ;
+				plotValues() ;
+				plotVector() ;
+				plotCluster() ;
+			});
+
 			init();
 			resize();
 			animate();
@@ -135,10 +165,8 @@
 		}
 
 
-//		const loader = new THREE.TextureLoader();
 
 		function init() {
-//			texture = loader.load("chessboard.jpg");
 
 			scene = new THREE.Scene();
 
@@ -164,25 +192,6 @@
 
 			controls = new THREE.OrbitControls(camera, renderer.domElement);
 			controls.addEventListener('change', render);
-			
-			canvas2dVect.addEventListener('click', function() {
-				sortEigenvectors = !sortEigenvectors ;
-				if( !sortEigenvectors ) {
-					sortOrder = null ; 
-				}
-				plotVector() ;
-			});
-			
-			canvas2dVals.addEventListener('click', function(evt) {
-				var x = evt.offsetX  ;
-				const w = clientWidth - 50 ;
-				x = ( x - 25 ) * responseMessage.eigenvalues.length / w ; 
-				eigenvalueIndex = ( x >=0 && x<responseMessage.eigenvalues.length ) ?
-						Math.floor( x ) : -1 ;
-				plotValues() ;
-				plotVector() ;
-			});
-
 		}
 
 		function animate() {
@@ -242,6 +251,8 @@
 			ctx.fill();
 		}
 
+		
+		
 		var sortOrder = null ;
 		function plotVector() {
 		
@@ -251,12 +262,14 @@
 
 			const h = clientHeight - 50 ;
 			const w = clientWidth - 50 ;
-
+/*
 			var st = eigenvalueIndex - 5 ;
 			if( st<0 ) st = 0 ;
 			if( st>=responseMessage.N ) st = responseMessage.N - 11 ;  
 			var ed = st + 10 ;
-
+*/
+			var st = 0 ;
+			var ed = 10 ;
 			let mn = responseMessage.eigenvectors[responseMessage.N*st] ;
 			let mx = mn ;
 			
@@ -271,7 +284,20 @@
 			const ctx=canvas2dVect.getContext("2d") ;
 			
 			var color = 0x603020 ;
-			
+
+			// get selected eigenvector
+			var tmp = responseMessage.eigenvectors.slice( eigenvalueIndex, eigenvalueIndex+responseMessage.N  )
+			if( sortEigenvectors ) {
+				sortOrder = tmp.map( function(e,i) { return {x:e, i:i } ; } )
+				  .sort( function(a, b){return a.x-b.x} ) 
+				  .map( function(e) { return e.i ; } ) ;
+			} else {
+				sortOrder = [] ;
+				for( let i=0 ; i<responseMessage.N ; i++ ) {
+					sortOrder[i] = i ;
+				}
+			} 
+
 			
 			for( let n=st ; n<ed ; n++ ) {
 
@@ -280,10 +306,9 @@
 							.slice( start, start+responseMessage.N  )
 							;
 				if( sortEigenvectors ) {
-					data = data.map( function(e,i) { return {x:e, i:i } ; } ) ;
-					data = data.sort( function(a, b){return a.x-b.x} ) ;
-					sortOrder = data.map( function(e) { return e.i ; } ) ;
-					data = data.map( function(e) { return e.x ; } ) ;					
+					data = data.map( function(e,i) { return {x:e, i:i } ; } ) 
+							   .sort( function(a, b){return a.x-b.x} ) 
+							   .map( function(e) { return e.x ; } ) ;					
 				} 
 				
 				var x = 0 ;
@@ -304,6 +329,52 @@
 				}
 				ctx.stroke();
 				
+			}
+		}
+
+		
+		function plotCluster() {
+		
+			canvas2dClus.width = canvas2dClus.width ;
+
+			if( !sortOrder || !responseMessage || responseMessage.eigenvectors.length==0 ) return ;
+
+			var N = responseMessage.N ;
+
+			let mn = responseMessage.surface[0] ;
+			let mx = mn ;
+			for ( let i=1 ; i<(N*N) ; i++ ) {
+				mn = Math.min( responseMessage.surface[i], mn ) ;
+				mx = Math.max( responseMessage.surface[i], mx ) ;				
+			}
+			const range = mx - mn ;
+
+			const h = clientHeight - 50 ;
+			const w = clientWidth - 50 ;
+			
+			const ctx=canvas2dClus.getContext("2d") ;
+			const pixelImage = ctx.createImageData(1,1); 
+			const pixelData = pixelImage.data;
+			pixelData[3] = 0xff ;
+			
+			ctx.beginPath();
+
+			
+			for ( let c=0, ix=0 ; c<N ; c++ ) {
+				let sc = sortOrder[c] ;
+				x = ( c / N ) * w ;				
+				for ( let r=0 ; r<N ; r++, ix++ ) {
+					y = ( r / N ) * h ;
+
+					let sr = sortOrder[r] ;
+					let val = responseMessage.surface[sc*N+sr] ;
+					let color = 0xffffff * ( val - mn ) / range ;
+					pixelData[0] = ( 0xff0000 & color ) >> 16 ; 					
+					pixelData[1] = ( 0xff00 & color ) >> 8 ; 					
+					pixelData[2] = ( 0xff & color ) ;
+					
+					ctx.putImageData( pixelImage, x+25, y+25 ) ;
+				}
 			}
 		}
 

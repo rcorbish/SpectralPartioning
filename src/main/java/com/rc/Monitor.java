@@ -25,14 +25,16 @@ public class Monitor implements AutoCloseable {
 	
 	final static Logger logger = LoggerFactory.getLogger( Monitor.class ) ;
 
+	public final static String INDEX_PARAM = "INDEX" ;
+	
 	final Random random ;
 	final Gson gson ;
 	final Laplace laplace ;
-	
+	final int N = 200 ;
 	{
 		gson = new Gson();
 		random = new Random() ;	
-		laplace = new Laplace( 200 ) ;
+		laplace = new Laplace( N ) ;
 	}
 	
 	
@@ -42,7 +44,7 @@ public class Monitor implements AutoCloseable {
 			URL mainPage = getClass().getClassLoader().getResource( "Client.html" ) ;
 			File path = new File( mainPage.getPath() ) ;
 			spark.Spark.staticFiles.externalLocation( path.getParent() ) ;
-			spark.Spark.get( "/data", this::getData, gson::toJson ) ;
+			spark.Spark.get( "/data/:" + INDEX_PARAM, this::getData, gson::toJson ) ;
 			spark.Spark.awaitInitialization() ;
 		} catch( Exception ohohChongo ) {
 			logger.error( "Server start failure.", ohohChongo );
@@ -56,17 +58,26 @@ public class Monitor implements AutoCloseable {
 	public Object getData(Request req, Response rsp) {
 		Object rc = null ;
 		try {
+			double eigenvectors[] = new double[N*N] ;
 			rsp.type( "application/json" );	
 			rsp.header("expires", "0" ) ;
 			rsp.header("cache-control", "no-cache" ) ;
 						
 			ResponseMessage responseMessage = new ResponseMessage() ;
 			
-			responseMessage.eigenvectors = new double[laplace.getN()*laplace.getN()] ;
+			String tmp = java.net.URLDecoder.decode( req.params( INDEX_PARAM ), "UTF-8" ) ;
+			int eigenvalueIndex = Integer.parseInt(tmp) ; 
+					
+			responseMessage.eigenvectors = new double[N*10] ;
 			responseMessage.N = laplace.getN() ;
 			responseMessage.surface = laplace.solve( 50 ) ;
-			responseMessage.eigenvalues = laplace.eigenValues( responseMessage.eigenvectors ) ;
-			
+			responseMessage.eigenvalues = laplace.eigenValues( eigenvectors ) ;
+
+			int st = eigenvalueIndex - 5 ;
+			if( st<0 ) st = 0 ;
+			if( st>=N ) st = N - 11 ;  
+
+			System.arraycopy(eigenvectors, st*N, responseMessage.eigenvectors, 0, responseMessage.eigenvectors.length );
 			rc = responseMessage ; 
 		} catch ( Throwable t ) {
 			logger.warn( "Error processing getItem request", t ) ;
