@@ -23,18 +23,21 @@ import spark.Response;
  */
 public class Monitor implements AutoCloseable {
 	
-	final static Logger logger = LoggerFactory.getLogger( Monitor.class ) ;
+	final static Logger log = LoggerFactory.getLogger( Monitor.class ) ;
 
 	public final static String INDEX_PARAM = "INDEX" ;
 	
 	final Random random ;
 	final Gson gson ;
 	final Laplace laplace ;
-	final int N = 200 ;
+	final Graph graph ;
+	
+	final int N = 100 ;
 	{
 		gson = new Gson();
 		random = new Random() ;	
 		laplace = new Laplace( N ) ;
+		graph = new Graph(N) ;
 	}
 	
 	
@@ -47,7 +50,7 @@ public class Monitor implements AutoCloseable {
 			spark.Spark.get( "/data/:" + INDEX_PARAM, this::getData, gson::toJson ) ;
 			spark.Spark.awaitInitialization() ;
 		} catch( Exception ohohChongo ) {
-			logger.error( "Server start failure.", ohohChongo );
+			log.error( "Server start failure.", ohohChongo );
 		}
 	}
 
@@ -58,6 +61,10 @@ public class Monitor implements AutoCloseable {
 	public Object getData(Request req, Response rsp) {
 		Object rc = null ;
 		try {
+			String tmp = java.net.URLDecoder.decode( req.params( INDEX_PARAM ), "UTF-8" ) ;
+			int eigenvalueIndex = Integer.parseInt(tmp) ; 
+			log.info( "REST call to getData({})", eigenvalueIndex ) ;
+			
 			double eigenvectors[] = new double[N*N] ;
 			rsp.type( "application/json" );	
 			rsp.header("expires", "0" ) ;
@@ -65,22 +72,25 @@ public class Monitor implements AutoCloseable {
 						
 			ResponseMessage responseMessage = new ResponseMessage() ;
 			
-			String tmp = java.net.URLDecoder.decode( req.params( INDEX_PARAM ), "UTF-8" ) ;
-			int eigenvalueIndex = Integer.parseInt(tmp) ; 
 					
+//			responseMessage.eigenvectors = new double[N*10] ;
+//			responseMessage.N = N ;
+//			responseMessage.surface = laplace.solve( 50 ) ;
+//			responseMessage.eigenvalues = laplace.eigenValues( eigenvectors ) ;
+
 			responseMessage.eigenvectors = new double[N*10] ;
-			responseMessage.N = laplace.getN() ;
-			responseMessage.surface = laplace.solve( 50 ) ;
-			responseMessage.eigenvalues = laplace.eigenValues( eigenvectors ) ;
+			responseMessage.N = N ;
+			responseMessage.surface = graph.getLaplacian() ;
+			responseMessage.eigenvalues = graph.eigenValues( eigenvectors ) ;
 
 			int st = eigenvalueIndex - 5 ;
 			if( st<0 ) st = 0 ;
-			if( st>=N ) st = N - 11 ;  
+			if( st>=(N-10) ) st = N - 11 ;  
 
 			System.arraycopy(eigenvectors, st*N, responseMessage.eigenvectors, 0, responseMessage.eigenvectors.length );
 			rc = responseMessage ; 
 		} catch ( Throwable t ) {
-			logger.warn( "Error processing getItem request", t ) ;
+			log.warn( "Error processing getItem request", t ) ;
 			rsp.status( 400 ) ;	
 		}
 		return rc ;
@@ -94,7 +104,7 @@ public class Monitor implements AutoCloseable {
 
 	static class ResponseMessage {
 		public int N ;
-		double surface[] ;
+		int surface[] ;
 		double eigenvalues[] ;
 		double eigenvectors[] ;
 	}

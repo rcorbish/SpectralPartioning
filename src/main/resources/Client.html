@@ -16,10 +16,8 @@
 	<canvas id="canvas-2d-clus"></canvas>
 
 	<script>
-		const UPDATE_INTERVAL = 150;
 		const MESH_SIZE = 300 ;
 		
-		var nextTimeGetData = 1;
 		var responseMessage  ;
 
 		var scene;
@@ -30,8 +28,7 @@
 		var texture;
 		var sortEigenvectors = false ;
 		var eigenvalueIndex = 5 ;
-		
-		var EXECS = 100 ;
+
 		
 		const material = new THREE.MeshStandardMaterial({
 			side : THREE.DoubleSide,
@@ -69,22 +66,14 @@
 				plotVector() ;
 				plotCluster() ;
 			}
-
-			nextTimeGetData = Date.now() + UPDATE_INTERVAL;
 		}
 
 		const xhr = new XMLHttpRequest();
 		xhr.addEventListener("load", processData);
 
 		function getData() {
-			let now = Date.now();
-			if(  nextTimeGetData && now > nextTimeGetData) {
-				nextTimeGetData = null ;
-				--EXECS ;
-				
-				xhr.open("GET", "/data/" + eigenvalueIndex ) ;
-				xhr.send();
-			}
+			xhr.open("GET", "/data/" + eigenvalueIndex ) ;
+			xhr.send();
 		}
 
 		var clientWidth  ;
@@ -111,9 +100,6 @@
 
 			renderer.setSize(clientWidth, clientHeight);
 			getData();
-			plotValues() ;
-			plotVector() ;
-			plotCluster() ;
 		}
 
 		window.addEventListener("resize", function() {
@@ -135,11 +121,11 @@
 				var x = evt.offsetX  ;
 				const w = clientWidth - 50 ;
 				x = ( x - 25 ) * responseMessage.eigenvalues.length / w ; 
-				eigenvalueIndex = ( x >=0 && x<responseMessage.eigenvalues.length ) ?
-						Math.floor( x ) : -1 ;
-				plotValues() ;
-				plotVector() ;
-				plotCluster() ;
+				eigenvalueIndex = Math.floor( x ) ;
+				
+				if( eigenvalueIndex<0 ) eigenvalueIndex = 0 ;
+				if( eigenvalueIndex>=responseMessage.eigenvalues.length ) eigenvalueIndex=responseMessage.eigenvalues.length -1 ;
+				getData() ;
 			});
 
 			init();
@@ -197,7 +183,6 @@
 		function animate() {
 			requestAnimationFrame(animate);
 			controls.update();
-			getData();
 		}
 
 		function render() {
@@ -353,9 +338,18 @@
 			const w = clientWidth - 50 ;
 			
 			const ctx=canvas2dClus.getContext("2d") ;
-			const pixelImage = ctx.createImageData(1,1); 
+			const pixelH = Math.ceil( h / responseMessage.N ) ;
+			const pixelW = Math.ceil( w / responseMessage.N ) ;
+			
+			const pixelImage = ctx.createImageData(pixelW,pixelH); 
 			const pixelData = pixelImage.data;
-			pixelData[3] = 0xff ;
+			
+			for( let pc=0 ; pc<pixelH ; pc++ ) {
+				for( let pr=0 ; pr<pixelW ; pr++ ) {
+					let ix = 4 * ( pc*pixelW + pr ) ;
+					pixelData[ix+3] = 0xff ;
+				}
+			}
 			
 			ctx.beginPath();
 
@@ -368,10 +362,23 @@
 
 					let sr = sortOrder[r] ;
 					let val = responseMessage.surface[sc*N+sr] ;
-					let color = 0xffffff * ( val - mn ) / range ;
-					pixelData[0] = ( 0xff0000 & color ) >> 16 ; 					
-					pixelData[1] = ( 0xff00 & color ) >> 8 ; 					
-					pixelData[2] = ( 0xff & color ) ;
+					if( val === 0 ) continue ;
+					
+					let normalizedVal = ( val - mn ) / range ;
+					let color = 0xffffff * normalizedVal ;					
+					
+					let rr = ( 0xff0000 & color ) >> 16 ; 					
+					let gg = ( 0xff00 & color ) >> 8 ; 					
+					let bb = ( 0xff & color ) ;
+					
+					for( let pc=0 ; pc<pixelH ; pc++ ) {
+						for( let pr=0 ; pr<pixelW ; pr++ ) {
+							let ix = 4 * ( pc*pixelW + pr ) ;
+							pixelData[ix+0] = rr ;
+							pixelData[ix+1] = gg ;
+							pixelData[ix+2] = bb ;
+						}
+					}
 					
 					ctx.putImageData( pixelImage, x+25, y+25 ) ;
 				}

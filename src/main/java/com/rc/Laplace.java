@@ -35,10 +35,10 @@ public class Laplace {
 
 		
 		for (int i = 0; i < N; i++) {
-			left[i]		=  Math.sin( i * Math.PI / ( 0.5 * N ) ) ; 
-			right[i]	=  - Math.sin( i * Math.PI / ( 0.5 * N ) ) ; 
-			top[i]		=  -Math.sin( i * Math.PI / ( 0.5 * N ) ) ; 
-			bottom[i]	=  Math.sin( i * Math.PI / ( 0.5 * N ) ) ; 
+			left[i]		=  Math.sin( i * Math.PI / ( N ) ) ; 
+			right[i]	=  - Math.sin( i * Math.PI / (  N ) ) ; 
+			top[i]		=  -Math.sin( i * Math.PI / (  N ) ) ; 
+			bottom[i]	=  Math.sin( i * Math.PI / (  N ) ) ; 
 		}
 	}
 
