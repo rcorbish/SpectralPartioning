@@ -21,7 +21,7 @@ public class Graph {
 
 	public Graph( int N ) {
 		random = new Random( 783 ) ;
-		int E = N * 33_000 ;
+		int E = N * 5_000 ;
 		edges = new int[E][2];
 		this.N = N ;
 
@@ -43,12 +43,12 @@ public class Graph {
 			} else if( f < 0.1f ) {
 				edges[i][0] = ix[ random.nextInt( N/3 ) + group2 ] ;
 				edges[i][1] = ix[ random.nextInt( N/3 ) + group3 ] ;				
-			} else if( f < 0.5f ) {
+			} else if( f < 0.4f ) {
 				edges[i][0] = ix[ random.nextInt( N/3 ) + group1 ] ;
 				do { 
 					edges[i][1] = ix[ random.nextInt( N/3 ) + group1 ] ;
 				} while( edges[i][1] == edges[i][0] ) ;				
-			} else if( f < 0.8f ) {
+			} else if( f < 0.7f ) {
 				edges[i][0] = ix[ random.nextInt( N/3 ) + group2 ] ;
 				do { 
 					edges[i][1] = ix[ random.nextInt( N/3 ) + group2 ] ;
