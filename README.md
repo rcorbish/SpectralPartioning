@@ -1,9 +1,9 @@
 # SpectralPartioning
 Spectral Partitioning of graphs
 
-A sample of spectral partitioning  see also [https://en.wikipedia.org/wiki/Spectral_clustering](spectral clustering)
+A sample of spectral partitioning  see also https://en.wikipedia.org/wiki/Spectral_clustering
 
-[https://www.cs.purdue.edu/homes/dgleich/demos/matlab/spectral/spectral.html](good link)
+https://www.cs.purdue.edu/homes/dgleich/demos/matlab/spectral/spectral.html
 
 ## Instructions
 
