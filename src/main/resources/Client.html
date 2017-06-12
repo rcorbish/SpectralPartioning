@@ -47,7 +47,18 @@
 		function processData() {
 			if (this.status === 200) {
 				responseMessage = JSON.parse(this.responseText);
-				
+
+				var mn = responseMessage.surface[0] ;
+				var mx = mn ;
+				for( let i=1 ; i<responseMessage.surface.length ; i++ ) {
+					mn = Math.min( mn, responseMessage.surface[i] ) ;
+					mx = Math.max( mx, responseMessage.surface[i] ) ;
+				}
+				const range = mx - mn ;
+				for( let i=0 ; i<responseMessage.surface.length ; i++ ) {
+//					responseMessage.surface[i] = ( responseMessage.surface[i] - mn ) / range  ;
+				}
+
 				let geometry = new THREE.ParametricBufferGeometry(
 						graphFunction, MESH_SIZE, MESH_SIZE );
 
@@ -58,6 +69,7 @@
 					mesh.geometry = geometry ;
 				}
 
+				
 				canvas3d.width = canvas3d.width ;
 
 				render() ;
@@ -140,9 +152,9 @@
 			let c = Math.floor( u * (responseMessage.N-1) ) ;
 			let r = Math.floor( v * (responseMessage.N-1) ) ;
 			
-			let y = clientHeight 
+			let y = clientHeight / 4
 					* responseMessage.surface[ c*responseMessage.N + r ] 
-					- clientHeight / 2;
+					- clientHeight / 8;
 
 			let z = v * clientWidth - clientWidth / 2;
 			let x = u * clientWidth - clientWidth / 2;
@@ -170,6 +182,10 @@
 			const light3 = new THREE.DirectionalLight(0x0000ff, 1.0);
 			light3.position.set(-1000, 1700, 0);
 			scene.add(light3);
+
+			const light4 = new THREE.DirectionalLight(0x00ff00, 1.0);
+			light4.position.set(0, -1000, 0);
+			scene.add(light4);
 
 			renderer = new THREE.WebGLRenderer();
 			renderer.setSize(window.innerWidth, window.innerHeight);
@@ -364,8 +380,8 @@
 					let val = responseMessage.surface[sc*N+sr] ;
 					if( val === 0 ) continue ;
 					
-					let normalizedVal = ( val - mn ) / range ;
-					let color = 0xffffff * normalizedVal ;					
+					val = ( val - mn ) / range ;
+					let color = 0xffffff * val ;					
 					
 					let rr = ( 0xff0000 & color ) >> 16 ; 					
 					let gg = ( 0xff00 & color ) >> 8 ; 					

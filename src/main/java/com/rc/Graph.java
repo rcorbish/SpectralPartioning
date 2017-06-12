@@ -6,10 +6,16 @@ import java.util.List;
 import java.util.Random;
 
 import org.netlib.lapack.Dsygv;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Graph {
+	final static Logger log = LoggerFactory.getLogger( Graph.class ) ;
 
 	final Random random ;
+
+	private double a[] = null ;
+	private double w[] = null ;
 
 	private final int N ;
 	private final int edges[][] ;
@@ -20,8 +26,11 @@ public class Graph {
 
 
 	public Graph( int N ) {
+		
+		log.info( "Creating Graph of {} x {}", N, N );
+		
 		random = new Random( 783 ) ;
-		int E = N * 5_000 ;
+		int E = N * 1_000 ;
 		edges = new int[E][2];
 		this.N = N ;
 
@@ -41,7 +50,7 @@ public class Graph {
 				edges[i][0] = ix[ random.nextInt( N/3 ) + group1 ] ;
 				edges[i][1] = ix[ random.nextInt( N/3 ) + group2 ] ;				
 			} else if( f < 0.1f ) {
-				edges[i][0] = ix[ random.nextInt( N/3 ) + group2 ] ;
+				edges[i][0] = ix[ random.nextInt( N/3 ) + group1 ] ;
 				edges[i][1] = ix[ random.nextInt( N/3 ) + group3 ] ;				
 			} else if( f < 0.4f ) {
 				edges[i][0] = ix[ random.nextInt( N/3 ) + group1 ] ;
@@ -60,7 +69,9 @@ public class Graph {
 				} while( edges[i][1] == edges[i][0] ) ;				
 			}
 		}
-		
+
+		log.info( "Created {} edges",  N );
+
 		adjacency 		= new int[N*N] ;
 		connectivity 	= new int[N] ;
 		laplacian 		= new int[N*N] ;
@@ -70,6 +81,7 @@ public class Graph {
 			connectivity[edges[i][0]]++ ; 
 			connectivity[edges[i][1]]++ ; 
 		}
+		log.info( "Created D" );
 
 		// build A matrix
 		for( int i=0 ; i<E ; i++ ) {
@@ -78,6 +90,7 @@ public class Graph {
 			adjacency[ix1]++ ; 
 			adjacency[ix2]++ ; 
 		}
+		log.info( "Created Adjacency" );
 
 		// build L matrix
 		for( int i=0 ; i<laplacian.length ; i++ ) {
@@ -86,11 +99,15 @@ public class Graph {
 		for( int i=0 ; i<connectivity.length ; i++ ) {
 			laplacian[i*(N+1)] = connectivity[i] ; 
 		}
+		log.info( "Created Laplacian" );
 
 	}
 
 	public int[] getLaplacian() {
 		return laplacian ;
+	}
+	public int[] getAdjacency() {
+		return adjacency ;
 	}
 	
 	public double[] eigenValues() {
@@ -99,45 +116,52 @@ public class Graph {
 
 	public synchronized double[] eigenValues( double[] v ) {
 
-		int itype = 2;
+		if( a == null ) {
+			log.info( "Calculating eigenvectors" ) ;
+			
+			int itype = 2;
+			
+			String jobz = "V" ;
+			String uplo = "U" ;
+	
+			a = new double[laplacian.length] ;
+			for( int i=0 ; i<a.length ; i++ ) a[i] = laplacian[i] ;
+			
+			int lda = N ;
+			double I[] = new double[N*N] ;
+			
+			for( int i=0 ; i<N ; i++ ) I[i*(N+1)] = 1.0 ;	// make identity matrix
+			
+			int ldb = N;
+			w = new double[N];
+	
+	
+			double tmp[] = new double[1] ;
+			
+			org.netlib.util.intW info = new org.netlib.util.intW(0);
+	
+			// calc optimum workspace size
+			int lwork = -1 ;
+			Dsygv.dsygv(itype, jobz, uplo, N, a, 0, lda, I, 0, 
+					ldb, w, 0, tmp, 0, -1, info);
+	
+			assert( info.val == 0 ) ;
+			
+			lwork = (int) tmp[0] ;
+			double []work = new double[lwork];
+	
+			Dsygv.dsygv(itype, jobz, uplo, N, a, 0, lda, I, 0, 
+					ldb, w, 0, work, 0, lwork, info);
+	
+			assert( info.val == 0 ) ;
+			log.info( "Eigenvectors calculate for {} x {}", N, N ) ;
+		}
 		
-		String jobz = "V" ;
-		String uplo = "U" ;
-
-		double a[] = new double[laplacian.length] ;
-		for( int i=0 ; i<a.length ; i++ ) a[i] = laplacian[i] ;
-		
-		int lda = N ;
-		double I[] = new double[N*N] ;
-		
-		for( int i=0 ; i<N ; i++ ) I[i*(N+1)] = 1.0 ;	// make identity matrix
-		
-		int ldb = N;
-		double w[] = new double[N];
-
-
-		double tmp[] = new double[1] ;
-		
-		org.netlib.util.intW info = new org.netlib.util.intW(0);
-
-		// calc optimum workspace size
-		int lwork = -1 ;
-		Dsygv.dsygv(itype, jobz, uplo, N, a, 0, lda, I, 0, 
-				ldb, w, 0, tmp, 0, -1, info);
-
-		assert( info.val == 0 ) ;
-		
-		lwork = (int) tmp[0] ;
-		double []work = new double[lwork];
-
-		Dsygv.dsygv(itype, jobz, uplo, N, a, 0, lda, I, 0, 
-				ldb, w, 0, work, 0, lwork, info);
-
-		assert( info.val == 0 ) ;
-
 		if( v != null ) {
 			System.arraycopy( a,0, v,0, a.length ) ;
 		}
+		
+
 		return w ;
 	}
 

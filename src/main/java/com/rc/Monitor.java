@@ -28,14 +28,14 @@ public class Monitor implements AutoCloseable {
 	
 	final Random random ;
 	final Gson gson ;
-	final Laplace laplace ;
+	//final Laplace laplace ;
 	final Graph graph ;
 	
-	final int N = 250 ;
+	final int N = 127 ;
 	{
 		gson = new Gson();
 		random = new Random() ;	
-		laplace = new Laplace( N ) ;
+		//laplace = new Laplace( N ) ;
 		graph = new Graph(N) ;
 	}
 	
@@ -71,7 +71,6 @@ public class Monitor implements AutoCloseable {
 						
 			ResponseMessage responseMessage = new ResponseMessage() ;
 			
-					
 //			responseMessage.eigenvectors = new double[N*10] ;
 //			responseMessage.N = N ;
 //			responseMessage.surface = laplace.solve( 50 ) ;
@@ -79,7 +78,7 @@ public class Monitor implements AutoCloseable {
 
 			responseMessage.eigenvectors = new double[N*10] ;
 			responseMessage.N = N ;
-			responseMessage.surface = graph.getLaplacian() ;
+			responseMessage.surface = graph.getAdjacency() ;
 			responseMessage.eigenvalues = graph.eigenValues( eigenvectors ) ;
 
 			int st = eigenvalueIndex - 5 ;
