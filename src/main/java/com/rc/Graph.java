@@ -30,7 +30,7 @@ public class Graph {
 		log.info( "Creating Graph of {} x {}", N, N );
 		
 		random = new Random( 783 ) ;
-		int E = N * 1_000 ;
+		int E = N * 100 ;
 		edges = new int[E][2];
 		this.N = N ;
 
@@ -46,16 +46,15 @@ public class Graph {
 		
 		for (int i = 0; i < E; i++ ) {
 			float f = random.nextFloat() ; 
-			if( f < 0.05f ) {
-				edges[i][0] = ix[ random.nextInt( N/3 ) + group1 ] ;
-				edges[i][1] = ix[ random.nextInt( N/3 ) + group2 ] ;				
-			} else if( f < 0.1f ) {
-				edges[i][0] = ix[ random.nextInt( N/3 ) + group1 ] ;
-				edges[i][1] = ix[ random.nextInt( N/3 ) + group3 ] ;				
+			if( f < 0.02f ) {
+				edges[i][0] = ix[ random.nextInt( N ) ] ;
+				do { 
+					edges[i][1] = ix[ random.nextInt( N ) ]  ;
+				} while( edges[i][1] == edges[i][0] ) ;				
 			} else if( f < 0.4f ) {
 				edges[i][0] = ix[ random.nextInt( N/3 ) + group1 ] ;
 				do { 
-					edges[i][1] = ix[ random.nextInt( N/3 ) + group1 ] ;
+					edges[i][1] = ix[ random.nextInt( N/3 ) + group1 ]  ;
 				} while( edges[i][1] == edges[i][0] ) ;				
 			} else if( f < 0.7f ) {
 				edges[i][0] = ix[ random.nextInt( N/3 ) + group2 ] ;
