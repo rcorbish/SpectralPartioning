@@ -43,30 +43,22 @@ public class Graph {
 		int group1 = 0 ;
 		int group2 = N / 3  ;
 		int group3 = 2 * N / 3 ;
-		
-		for (int i = 0; i < E; i++ ) {
+		int nodeIndex = 0 ;
+		for (int i = 0; i < E; i++, nodeIndex++ ) {
+			if( nodeIndex>=N ) nodeIndex=0 ;
+			int g = nodeIndex > group3 ? group3 : nodeIndex > group2 ? group2 : group1 ;
+
+			edges[i][0] = ix[nodeIndex] ;
+
 			float f = random.nextFloat() ; 
-			if( f < 0.02f ) {
-				edges[i][0] = ix[ random.nextInt( N ) ] ;
-				do { 
+
+			do {
+				if( f < 0.03f ) {
 					edges[i][1] = ix[ random.nextInt( N ) ]  ;
-				} while( edges[i][1] == edges[i][0] ) ;				
-			} else if( f < 0.4f ) {
-				edges[i][0] = ix[ random.nextInt( N/3 ) + group1 ] ;
-				do { 
-					edges[i][1] = ix[ random.nextInt( N/3 ) + group1 ]  ;
-				} while( edges[i][1] == edges[i][0] ) ;				
-			} else if( f < 0.7f ) {
-				edges[i][0] = ix[ random.nextInt( N/3 ) + group2 ] ;
-				do { 
-					edges[i][1] = ix[ random.nextInt( N/3 ) + group2 ] ;
-				} while( edges[i][1] == edges[i][0] ) ;				
-			} else {
-				edges[i][0] = ix[ random.nextInt( N/3 ) + group3 ] ;
-				do { 
-					edges[i][1] = ix[ random.nextInt( N/3 ) + group3 ] ;
-				} while( edges[i][1] == edges[i][0] ) ;				
-			}
+				} else {
+					edges[i][1] = ix[ random.nextInt( N/3 ) + g ]  ;
+				}
+			} while( edges[i][1] == edges[i][0] ) ;				
 		}
 
 		log.info( "Created {} edges",  N );

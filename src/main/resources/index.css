@@ -164,6 +164,13 @@ input[type=range]:-moz-focusring{
 	width: 50% ;
 	height: 50% ;
 }
+#e-index {
+	position: absolute ;
+	top: 10px  ;
+	left: 50% ;
+	z-index: 10 ;
+	width: 100px ;
+}
 
 #canvas-2d-clus {
 	background-color: black ;

@@ -14,6 +14,7 @@
 	<canvas id="canvas-2d-vals"></canvas>
 	<canvas id="canvas-2d-vect"></canvas>
 	<canvas id="canvas-2d-clus"></canvas>
+	<input type="number" id='e-index' value="0" >
 
 	<script>
 		const MESH_SIZE = 300 ;
@@ -43,6 +44,7 @@
 		const canvas2dVals = document.getElementById("canvas-2d-vals");
 		const canvas2dVect = document.getElementById("canvas-2d-vect");
 		const canvas2dClus = document.getElementById("canvas-2d-clus");
+		const eIndex  = document.getElementById("e-index");
 
 		function processData() {
 			if (this.status === 200) {
@@ -134,11 +136,22 @@
 				const w = clientWidth - 50 ;
 				x = ( x - 25 ) * responseMessage.eigenvalues.length / w ; 
 				eigenvalueIndex = Math.floor( x ) ;
-				
+
 				if( eigenvalueIndex<0 ) eigenvalueIndex = 0 ;
 				if( eigenvalueIndex>=responseMessage.eigenvalues.length ) eigenvalueIndex=responseMessage.eigenvalues.length -1 ;
 				getData() ;
+				
+				eIndex.value = eigenvalueIndex ; 
 			});
+
+			eIndex.value = eigenvalueIndex ;
+			eIndex.addEventListener('change', function(evt) {
+				eigenvalueIndex = this.valueAsNumber ;
+				if( eigenvalueIndex<0 ) eigenvalueIndex = 0 ;
+				if( eigenvalueIndex>=responseMessage.eigenvalues.length ) eigenvalueIndex=responseMessage.eigenvalues.length -1 ;
+				getData() ;
+				eIndex.value = eigenvalueIndex ; 
+			}) ;
 
 			init();
 			resize();
