@@ -93,7 +93,7 @@ public class Laplace {
 
 	public synchronized double[] eigenValues( double[] v ) {
 
-		int itype = 1;
+		int itype = 3;   // I A x = eig B 
 		
 		String jobz = "V" ;
 		String uplo = "U" ;

@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Laplace</title>
+<title>Spectral Clustering</title>
 <link rel="stylesheet" href="index.css">
 <script src="js/three.min.js"></script>
 <script src="js/OrbitControls.js"></script>
@@ -276,22 +276,13 @@
 
 			const h = clientHeight - 50 ;
 			const w = clientWidth - 50 ;
-/*
-			var st = eigenvalueIndex - 5 ;
-			if( st<0 ) st = 0 ;
-			if( st>=responseMessage.N ) st = responseMessage.N - 11 ;  
-			var ed = st + 10 ;
-*/
-			var st = 0 ;
-			var ed = 10 ;
-			let mn = responseMessage.eigenvectors[responseMessage.N*st] ;
+
+			let mn = responseMessage.eigenvectors[0] ;
 			let mx = mn ;
 			
-			for( let i=st ; i<ed ; i++ ) {
-				for( let j=0 ; j<responseMessage.N; j++ ) {
-					mn = Math.min( responseMessage.eigenvectors[responseMessage.N*i+j], mn ) ;
-					mx = Math.max( responseMessage.eigenvectors[responseMessage.N*i+j], mx ) ;
-				}
+			for( let i=0 ; i<responseMessage.eigenvectors.length ; i++ ) {
+				mn = Math.min( responseMessage.eigenvectors[i], mn ) ;
+				mx = Math.max( responseMessage.eigenvectors[i], mx ) ;
 			}
 			const range = mx - mn ;
 			
@@ -312,13 +303,12 @@
 				}
 			} 
 
-			
-			for( let n=st ; n<ed ; n++ ) {
-
-				const start = responseMessage.N * n ;
+			var start = 0 ;
+			for( let n=0 ; n<responseMessage.eigenvectors.length ; n += responseMessage.N ) {
 				var data = responseMessage.eigenvectors
-							.slice( start, start+responseMessage.N  )
+							.slice( n, n+responseMessage.N  )
 							;
+
 				if( sortEigenvectors ) {
 					data = data.map( function(e,i) { return {x:e, i:i } ; } ) 
 							   .sort( function(a, b){return a.x-b.x} ) 
@@ -332,7 +322,7 @@
 				let cc = "000000" + color.toString(16) ;
 				
 				ctx.beginPath();
-				ctx.strokeStyle="#" + cc.substring( cc.length-8 ) ;
+				ctx.strokeStyle="#" + cc.substring( cc.length-6 ) ;
 				ctx.lineWidth = 1 ;
 				ctx.moveTo( x+25, y+25 );
 

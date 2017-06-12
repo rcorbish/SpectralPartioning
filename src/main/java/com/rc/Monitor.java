@@ -28,14 +28,12 @@ public class Monitor implements AutoCloseable {
 	
 	final Random random ;
 	final Gson gson ;
-	//final Laplace laplace ;
 	final Graph graph ;
 	
 	final int N = 127 ;
 	{
 		gson = new Gson();
 		random = new Random() ;	
-		//laplace = new Laplace( N ) ;
 		graph = new Graph(N) ;
 	}
 	
@@ -70,22 +68,16 @@ public class Monitor implements AutoCloseable {
 			rsp.header("cache-control", "no-cache" ) ;
 						
 			ResponseMessage responseMessage = new ResponseMessage() ;
-			
-//			responseMessage.eigenvectors = new double[N*10] ;
-//			responseMessage.N = N ;
-//			responseMessage.surface = laplace.solve( 50 ) ;
-//			responseMessage.eigenvalues = laplace.eigenValues( eigenvectors ) ;
 
-			responseMessage.eigenvectors = new double[N*10] ;
+			responseMessage.eigenvectors = new double[N] ;
 			responseMessage.N = N ;
 			responseMessage.surface = graph.getAdjacency() ;
 			responseMessage.eigenvalues = graph.eigenValues( eigenvectors ) ;
 
-			int st = eigenvalueIndex - 5 ;
-			if( st<0 ) st = 0 ;
-			if( st>=(N-10) ) st = N - 11 ;  
+			if( eigenvalueIndex < 0 ) eigenvalueIndex = 0 ;
+			if( eigenvalueIndex >= N ) eigenvalueIndex = N-1 ;
 
-			System.arraycopy(eigenvectors, st*N, responseMessage.eigenvectors, 0, responseMessage.eigenvectors.length );
+			System.arraycopy(eigenvectors, eigenvalueIndex*N, responseMessage.eigenvectors, 0, responseMessage.eigenvectors.length );
 			rc = responseMessage ; 
 		} catch ( Throwable t ) {
 			log.warn( "Error processing getItem request", t ) ;
