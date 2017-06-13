@@ -15,6 +15,9 @@
 	<canvas id="canvas-2d-vect"></canvas>
 	<canvas id="canvas-2d-clus"></canvas>
 	<input type="number" id='e-index' value="0" >
+	<div id='e-value'></div>
+	<div id='e-norm'></div>
+	<div id='e-gap'></div>
 
 	<script>
 		const MESH_SIZE = 300 ;
@@ -255,7 +258,7 @@
 			ctx.stroke();
 			
 			ctx.beginPath();
-			ctx.fillStyle="#3060a0" ;
+			ctx.fillStyle="#4080c0" ;
 
 			if( eigenvalueIndex >= 0 ) {
 				y = h - ( ( responseMessage.eigenvalues[eigenvalueIndex] - mn ) / range * h ) ;
@@ -263,6 +266,13 @@
 				ctx.arc(x+25,y+25,5,0,2*Math.PI);
 			}
 			ctx.fill();
+			
+			document.getElementById( "e-value" ).innerHTML = "&lambda;=" + responseMessage.eigenvalues[eigenvalueIndex] ;
+			document.getElementById( "e-gap" ).innerHTML =  eigenvalueIndex>0 ? ( "gap=" + (responseMessage.eigenvalues[eigenvalueIndex] - responseMessage.eigenvalues[eigenvalueIndex-1]) ) : "n/a" ;
+
+//			var t =	responseMessage.eigenvectors.reduce( function(p,x) { return  p + x*x ; }, 0 ) ; 			
+//			document.getElementById( "e-norm" ).innerHTML =  "|x|=" + Math.sqrt(t)  ;
+
 		}
 
 		
@@ -291,9 +301,8 @@
 			var color = 0x603020 ;
 
 			// get selected eigenvector
-			var tmp = responseMessage.eigenvectors.slice( eigenvalueIndex, eigenvalueIndex+responseMessage.N  )
 			if( sortEigenvectors ) {
-				sortOrder = tmp.map( function(e,i) { return {x:e, i:i } ; } )
+				sortOrder = responseMessage.eigenvectors.map( function(e,i) { return {x:e, i:i } ; } )
 				  .sort( function(a, b){return a.x-b.x} ) 
 				  .map( function(e) { return e.i ; } ) ;
 			} else {

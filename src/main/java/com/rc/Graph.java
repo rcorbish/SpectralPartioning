@@ -18,7 +18,6 @@ public class Graph {
 	private double w[] = null ;
 
 	private final int N ;
-	private final int edges[][] ;
 	
 	private final int adjacency[] ;
 	private final int connectivity[] ;
@@ -30,8 +29,6 @@ public class Graph {
 		log.info( "Creating Graph of {} x {}", N, N );
 		
 		random = new Random( 783 ) ;
-		int E = N * 100 ;
-		edges = new int[E][2];
 		this.N = N ;
 
 		List<Integer> ixt = new ArrayList<>() ;
@@ -39,7 +36,10 @@ public class Graph {
 		Collections.shuffle(ixt);
 		int ix[] = new int[N] ;
 		for( int i=0 ; i<N ; i++ ) ix[i] = ixt.get(i) ;
-		
+
+		int E = N * 1_000 ;
+		Edge edges[] = new Edge[E];
+
 		int group1 = 0 ;
 		int group2 = N / 3  ;
 		int group3 = 2 * N / 3 ;
@@ -48,17 +48,20 @@ public class Graph {
 			if( nodeIndex>=N ) nodeIndex=0 ;
 			int g = nodeIndex > group3 ? group3 : nodeIndex > group2 ? group2 : group1 ;
 
-			edges[i][0] = ix[nodeIndex] ;
+			Edge edge = new Edge() ;
+			edge.from = ix[nodeIndex] ;
 
 			float f = random.nextFloat() ; 
 
 			do {
-				if( f < 0.03f ) {
-					edges[i][1] = ix[ random.nextInt( N ) ]  ;
+				if( f < 0.1f ) {
+					edge.to = ix[ random.nextInt( N ) ]  ;
 				} else {
-					edges[i][1] = ix[ random.nextInt( N/3 ) + g ]  ;
+					edge.to = ix[ random.nextInt( N/3 ) + g ]  ;
 				}
-			} while( edges[i][1] == edges[i][0] ) ;				
+			} while( edge.to == edge.from ) ;
+			
+			edges[i] = edge ;
 		}
 
 		log.info( "Created {} edges",  N );
@@ -68,18 +71,18 @@ public class Graph {
 		laplacian 		= new int[N*N] ;
 		
 		// build D matrix
-		for( int i=0 ; i<E ; i++ ) {
-			connectivity[edges[i][0]]++ ; 
-			connectivity[edges[i][1]]++ ; 
+		for( Edge e : edges ) {
+			connectivity[e.from]++ ; 
+			connectivity[e.to]++ ; 
 		}
 		log.info( "Created D" );
 
 		// build A matrix
-		for( int i=0 ; i<E ; i++ ) {
-			int ix1 = edges[i][0] * N + edges[i][1] ;
-			int ix2 = edges[i][1] * N + edges[i][0] ;
-			adjacency[ix1]++ ; 
-			adjacency[ix2]++ ; 
+		for( Edge e : edges ) {
+			int ix1 = e.from * N + e.to ;
+			int ix2 = e.to * N + e.from ;
+			adjacency[ix1] ++ ; 
+			adjacency[ix2] ++ ; 
 		}
 		log.info( "Created Adjacency" );
 
@@ -158,4 +161,13 @@ public class Graph {
 
 }
 
+
+class Edge implements Comparable<Edge> {
+	int from ;
+	int to ;
+	
+	public int compareTo( Edge o ) {
+		return from==o.from ? to - o.to : from - o.from ;
+	}
+}
 
