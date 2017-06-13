@@ -37,7 +37,7 @@ public class Graph {
 		int ix[] = new int[N] ;
 		for( int i=0 ; i<N ; i++ ) ix[i] = ixt.get(i) ;
 
-		int E = N * 1_000 ;
+		int E = N * 100;
 		Edge edges[] = new Edge[E];
 
 		int group1 = 0 ;
@@ -54,7 +54,7 @@ public class Graph {
 			float f = random.nextFloat() ; 
 
 			do {
-				if( f < 0.1f ) {
+				if( f < 0.125f ) {
 					edge.to = ix[ random.nextInt( N ) ]  ;
 				} else {
 					edge.to = ix[ random.nextInt( N/3 ) + g ]  ;

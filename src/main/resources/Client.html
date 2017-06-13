@@ -30,8 +30,8 @@
 		var renderer;
 		var mesh;
 		var texture;
-		var sortEigenvectors = false ;
-		var eigenvalueIndex = 0 ;
+		var sortEigenvectors = true ;
+		var eigenvalueIndex = 1 ;
 
 		
 		const material = new THREE.MeshStandardMaterial({
@@ -270,7 +270,7 @@
 			document.getElementById( "e-value" ).innerHTML = "&lambda;=" + responseMessage.eigenvalues[eigenvalueIndex] ;
 			document.getElementById( "e-gap" ).innerHTML =  eigenvalueIndex>0 ? ( "gap=" + (responseMessage.eigenvalues[eigenvalueIndex] - responseMessage.eigenvalues[eigenvalueIndex-1]) ) : "n/a" ;
 
-//			var t =	responseMessage.eigenvectors.reduce( function(p,x) { return  p + x*x ; }, 0 ) ; 			
+//			var t =	responseMessage.eigenvector.reduce( function(p,x) { return  p + x*x ; }, 0 ) ; 			
 //			document.getElementById( "e-norm" ).innerHTML =  "|x|=" + Math.sqrt(t)  ;
 
 		}
@@ -282,17 +282,17 @@
 		
 			canvas2dVect.width = canvas2dVect.width ;
 
-			if( !responseMessage || responseMessage.eigenvectors.length==0 ) return ;
+			if( !responseMessage || responseMessage.eigenvector.length==0 ) return ;
 
 			const h = clientHeight - 50 ;
 			const w = clientWidth - 50 ;
 
-			let mn = responseMessage.eigenvectors[0] ;
-			let mx = mn ;
+			var mn = responseMessage.eigenvector[0] ;
+			var mx = mn ;
 			
-			for( let i=0 ; i<responseMessage.eigenvectors.length ; i++ ) {
-				mn = Math.min( responseMessage.eigenvectors[i], mn ) ;
-				mx = Math.max( responseMessage.eigenvectors[i], mx ) ;
+			for( var i=0 ; i<responseMessage.eigenvector.length ; i++ ) {
+				mn = Math.min( responseMessage.eigenvector[i], mn ) ;
+				mx = Math.max( responseMessage.eigenvector[i], mx ) ;
 			}
 			const range = mx - mn ;
 			
@@ -302,19 +302,19 @@
 
 			// get selected eigenvector
 			if( sortEigenvectors ) {
-				sortOrder = responseMessage.eigenvectors.map( function(e,i) { return {x:e, i:i } ; } )
+				sortOrder = responseMessage.eigenvector.map( function(e,i) { return {x:e, i:i } ; } )
 				  .sort( function(a, b){return a.x-b.x} ) 
 				  .map( function(e) { return e.i ; } ) ;
 			} else {
 				sortOrder = [] ;
-				for( let i=0 ; i<responseMessage.N ; i++ ) {
+				for( var i=0 ; i<responseMessage.N ; i++ ) {
 					sortOrder[i] = i ;
 				}
 			} 
 
 			var start = 0 ;
-			for( let n=0 ; n<responseMessage.eigenvectors.length ; n += responseMessage.N ) {
-				var data = responseMessage.eigenvectors
+			for( var n=0 ; n<responseMessage.eigenvector.length ; n += responseMessage.N ) {
+				var data = responseMessage.eigenvector
 							.slice( n, n+responseMessage.N  )
 							;
 
@@ -328,14 +328,14 @@
 				var y = h - ( ( data[0] - mn ) / range * h ) ;
 				
 				color += 0x806020 ;
-				let cc = "000000" + color.toString(16) ;
+				const cc = "000000" + color.toString(16) ;
 				
 				ctx.beginPath();
 				ctx.strokeStyle="#" + cc.substring( cc.length-6 ) ;
 				ctx.lineWidth = 1 ;
 				ctx.moveTo( x+25, y+25 );
 
-				for( let i=1 ; i<data.length ; i++ ) {
+				for( var i=1 ; i<data.length ; i++ ) {
 					x = ( i / responseMessage.N ) * w ;				
 					y = h - ( ( data[i] - mn ) / range * h ) ;
 					ctx.lineTo( x+25, y+25 );
@@ -350,13 +350,13 @@
 		
 			canvas2dClus.width = canvas2dClus.width ;
 
-			if( !sortOrder || !responseMessage || responseMessage.eigenvectors.length==0 ) return ;
+			if( !sortOrder || !responseMessage || responseMessage.eigenvector.length==0 ) return ;
 
 			var N = responseMessage.N ;
 
-			let mn = responseMessage.surface[0] ;
-			let mx = mn ;
-			for ( let i=1 ; i<(N*N) ; i++ ) {
+			var mn = responseMessage.surface[0] ;
+			var mx = mn ;
+			for ( var i=1 ; i<(N*N) ; i++ ) {
 				mn = Math.min( responseMessage.surface[i], mn ) ;
 				mx = Math.max( responseMessage.surface[i], mx ) ;				
 			}
@@ -372,36 +372,41 @@
 			const pixelImage = ctx.createImageData(pixelW,pixelH); 
 			const pixelData = pixelImage.data;
 			
-			for( let pc=0 ; pc<pixelH ; pc++ ) {
-				for( let pr=0 ; pr<pixelW ; pr++ ) {
-					let ix = 4 * ( pc*pixelW + pr ) ;
+			var ix ;
+			for( var pc=0 ; pc<pixelH ; pc++ ) {
+				for( var pr=0 ; pr<pixelW ; pr++ ) {
+					ix = 4 * ( pc*pixelW + pr ) ;
 					pixelData[ix+3] = 0xff ;
 				}
 			}
 			
 			ctx.beginPath();
 
+			var sc ;
+			var sr ;
+			var val ;
+			var rr, gg, bb ;
 			
-			for ( let c=0, ix=0 ; c<N ; c++ ) {
-				let sc = sortOrder[c] ;
+			for ( var c=0, ix=0 ; c<N ; c++ ) {
+				sc = sortOrder[c] ;
 				x = ( c / N ) * w ;				
-				for ( let r=0 ; r<N ; r++, ix++ ) {
+				for ( var  r=0 ; r<N ; r++, ix++ ) {
 					y = ( r / N ) * h ;
 
-					let sr = sortOrder[r] ;
-					let val = responseMessage.surface[sc*N+sr] ;
+					sr = sortOrder[r] ;
+					val = responseMessage.surface[sc*N+sr] ;
 					if( val === 0 ) continue ;
 					
 					val = ( val - mn ) / range ;
 					let color = 0xffffff * val ;					
 					
-					let rr = ( 0xff0000 & color ) >> 16 ; 					
-					let gg = ( 0xff00 & color ) >> 8 ; 					
-					let bb = ( 0xff & color ) ;
+					rr = ( 0xff0000 & color ) >> 16 ; 					
+					gg = ( 0xff00 & color ) >> 8 ; 					
+					bb = ( 0xff & color ) ;
 					
-					for( let pc=0 ; pc<pixelH ; pc++ ) {
-						for( let pr=0 ; pr<pixelW ; pr++ ) {
-							let ix = 4 * ( pc*pixelW + pr ) ;
+					for( var pc=0 ; pc<pixelH ; pc++ ) {
+						for( var pr=0 ; pr<pixelW ; pr++ ) {
+							ix = 4 * ( pc*pixelW + pr ) ;
 							pixelData[ix+0] = rr ;
 							pixelData[ix+1] = gg ;
 							pixelData[ix+2] = bb ;

@@ -69,7 +69,7 @@ public class Monitor implements AutoCloseable {
 						
 			ResponseMessage responseMessage = new ResponseMessage() ;
 
-			responseMessage.eigenvectors = new double[N] ;
+			responseMessage.eigenvector = new double[N] ;
 			responseMessage.N = N ;
 			responseMessage.surface = graph.getAdjacency() ;
 			responseMessage.eigenvalues = graph.eigenValues( eigenvectors ) ;
@@ -77,7 +77,7 @@ public class Monitor implements AutoCloseable {
 			if( eigenvalueIndex < 0 ) eigenvalueIndex = 0 ;
 			if( eigenvalueIndex >= N ) eigenvalueIndex = N-1 ;
 
-			System.arraycopy(eigenvectors, eigenvalueIndex*N, responseMessage.eigenvectors, 0, responseMessage.eigenvectors.length );
+			System.arraycopy(eigenvectors, eigenvalueIndex*N, responseMessage.eigenvector, 0, responseMessage.eigenvector.length );
 			rc = responseMessage ; 
 		} catch ( Throwable t ) {
 			log.warn( "Error processing getItem request", t ) ;
@@ -96,6 +96,6 @@ public class Monitor implements AutoCloseable {
 		public int N ;
 		int surface[] ;
 		double eigenvalues[] ;
-		double eigenvectors[] ;
+		double eigenvector[] ;
 	}
 }
