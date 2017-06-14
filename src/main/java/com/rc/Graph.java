@@ -1,5 +1,8 @@
 package com.rc;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +40,7 @@ public class Graph {
 		int ix[] = new int[N] ;
 		for( int i=0 ; i<N ; i++ ) ix[i] = ixt.get(i) ;
 
-		int E = N * 100;
+		int E = N * 8  ;
 		Edge edges[] = new Edge[E];
 
 		int group1 = 0 ;
@@ -65,6 +68,15 @@ public class Graph {
 		}
 
 		log.info( "Created {} edges",  N );
+		
+		try {
+			CsvReader csvr = new CsvReader( 1,2,3,4,0 ) ;
+			Path p = Paths.get( "edges.csv" ) ;
+			List<Edge> parsedEdges = csvr.parse( p );
+			edges = parsedEdges.toArray( new Edge[0] ) ;
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 
 		adjacency 		= new int[N*N] ;
 		connectivity 	= new int[N] ;
