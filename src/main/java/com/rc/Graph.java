@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -15,8 +16,6 @@ import org.slf4j.LoggerFactory;
 public class Graph {
 	final static Logger log = LoggerFactory.getLogger( Graph.class ) ;
 
-	final Random random ;
-
 	private double a[] = null ;
 	private double w[] = null ;
 
@@ -27,28 +26,26 @@ public class Graph {
 	private final int laplacian[] ;
 
 
-	public Graph( int N ) {
+	public static Graph random( int size ) {
 		
-		log.info( "Creating Graph of {} x {}", N, N );
+		log.info( "Creating random Graph of {} x {}", size, size );
 		
-		random = new Random( 783 ) ;
-		this.N = N ;
+		final Random random = new Random( 783 ) ;
 
 		List<Integer> ixt = new ArrayList<>() ;
-		for( int i=0 ; i<N ; i++ ) ixt.add(i) ;
+		for( int i=0 ; i<size ; i++ ) ixt.add(i) ;
 		Collections.shuffle(ixt);
-		int ix[] = new int[N] ;
-		for( int i=0 ; i<N ; i++ ) ix[i] = ixt.get(i) ;
+		int ix[] = new int[size] ;
+		for( int i=0 ; i<size ; i++ ) ix[i] = ixt.get(i) ;
 
-		int E = N * 8  ;
-		Edge edges[] = new Edge[E];
-
+		int E = size * 20  ;
+		List<Edge> edges = new ArrayList<>() ;
 		int group1 = 0 ;
-		int group2 = N / 3  ;
-		int group3 = 2 * N / 3 ;
+		int group2 = size / 3  ;
+		int group3 = 2 * size / 3 ;
 		int nodeIndex = 0 ;
 		for (int i = 0; i < E; i++, nodeIndex++ ) {
-			if( nodeIndex>=N ) nodeIndex=0 ;
+			if( nodeIndex>=size ) nodeIndex=0 ;
 			int g = nodeIndex > group3 ? group3 : nodeIndex > group2 ? group2 : group1 ;
 
 			Edge edge = new Edge() ;
@@ -58,26 +55,31 @@ public class Graph {
 
 			do {
 				if( f < 0.125f ) {
-					edge.to = ix[ random.nextInt( N ) ]  ;
+					edge.to = ix[ random.nextInt( size ) ]  ;
 				} else {
-					edge.to = ix[ random.nextInt( N/3 ) + g ]  ;
+					edge.to = ix[ random.nextInt( size/3 ) + g ]  ;
 				}
 			} while( edge.to == edge.from ) ;
 			
-			edges[i] = edge ;
+			edges.add( edge ) ;
 		}
 
-		log.info( "Created {} edges",  N );
+		log.info( "Created {} edges",  size );
+
+		return new Graph( edges, size ) ;
+	}
+
+
+	public static Graph create( Path path ) throws IOException {
+		CsvReader csvr = new CsvReader( 1,2,3,4,0 ) ;
+		Path p = Paths.get( "edges.csv" ) ;
+		List<Edge> parsedEdges = csvr.parse( p );
+		return new Graph( parsedEdges, csvr.getNumNodes() ) ;		
+	}
+
+	public Graph( List<Edge> edges, int N ) {
 		
-		try {
-			CsvReader csvr = new CsvReader( 1,2,3,4,0 ) ;
-			Path p = Paths.get( "edges.csv" ) ;
-			List<Edge> parsedEdges = csvr.parse( p );
-			edges = parsedEdges.toArray( new Edge[0] ) ;
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-
+		this.N = N ;
 		adjacency 		= new int[N*N] ;
 		connectivity 	= new int[N] ;
 		laplacian 		= new int[N*N] ;
@@ -166,9 +168,26 @@ public class Graph {
 		if( v != null ) {
 			System.arraycopy( a,0, v,0, a.length ) ;
 		}
-		
-
 		return w ;
+	}
+
+	public int eigenvectorPartition( double ev[] ) {
+		double sev[] = new double[ev.length] ;
+		System.arraycopy(ev, 0, sev, 0, sev.length );
+		Arrays.sort( sev ) ;
+		//log.info( "Sorted ev = {}", sev ) ;
+		int rc = 1 ;
+		double mxg = 0.0 ;
+		for( int i=1 ; i<sev.length ; i++ ) {
+			double grad = sev[i] - sev[i-i] ;
+			if( grad>mxg ) {
+				mxg = grad ;
+				rc = i ;
+			}
+			log.info( "{}\t{}", grad, mxg ) ;
+		}
+		log.info( "Partition = {}, dy/dx = {}", rc, mxg ) ;
+		return rc ;
 	}
 
 }

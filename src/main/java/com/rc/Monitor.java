@@ -34,7 +34,7 @@ public class Monitor implements AutoCloseable {
 	{
 		gson = new Gson();
 		random = new Random() ;	
-		graph = new Graph(N) ;
+		graph = Graph.random(N) ;
 	}
 	
 	
@@ -69,15 +69,16 @@ public class Monitor implements AutoCloseable {
 						
 			ResponseMessage responseMessage = new ResponseMessage() ;
 
-			responseMessage.eigenvector = new double[N] ;
-			responseMessage.N = N ;
-			responseMessage.surface = graph.getAdjacency() ;
-			responseMessage.eigenvalues = graph.eigenValues( eigenvectors ) ;
-
 			if( eigenvalueIndex < 0 ) eigenvalueIndex = 0 ;
 			if( eigenvalueIndex >= N ) eigenvalueIndex = N-1 ;
 
+			responseMessage.N = N ;
+			responseMessage.surface = graph.getAdjacency() ;
+			responseMessage.eigenvalues = graph.eigenValues( eigenvectors ) ;
+			responseMessage.eigenvector = new double[N] ;
 			System.arraycopy(eigenvectors, eigenvalueIndex*N, responseMessage.eigenvector, 0, responseMessage.eigenvector.length );
+			responseMessage.partition = graph.eigenvectorPartition( responseMessage.eigenvector ) ;
+
 			rc = responseMessage ; 
 		} catch ( Throwable t ) {
 			log.warn( "Error processing getItem request", t ) ;
@@ -93,7 +94,8 @@ public class Monitor implements AutoCloseable {
 	}
 
 	static class ResponseMessage {
-		public int N ;
+		int N ;
+		int partition ;
 		int surface[] ;
 		double eigenvalues[] ;
 		double eigenvector[] ;
