@@ -4,9 +4,13 @@ Spectral Partitioning of graphs
 A sample of spectral partitioning  see also 
 
 https://en.wikipedia.org/wiki/Spectral_clustering
+
 https://www.cs.purdue.edu/homes/dgleich/demos/matlab/spectral/spectral.html
+
 https://devblogs.nvidia.com/parallelforall/fast-spectral-graph-partitioning-gpus/
+
 https://csustan.csustan.edu/~tom/Clustering/GraphLaplacian-tutorial.pdf
+
 http://math.mit.edu/~kelner/Publications/Docs/LowGenusJournal.pdf
 
 
