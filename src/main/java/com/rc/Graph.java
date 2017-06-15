@@ -22,7 +22,7 @@ public class Graph {
 	private final int N ;
 	
 	private final int adjacency[] ;
-	private final int connectivity[] ;
+	private final int degree[] ;
 	private final int laplacian[] ;
 
 
@@ -38,7 +38,7 @@ public class Graph {
 		int ix[] = new int[size] ;
 		for( int i=0 ; i<size ; i++ ) ix[i] = ixt.get(i) ;
 
-		int E = size * 20  ;
+		int E = size * 400  ;
 		List<Edge> edges = new ArrayList<>() ;
 		int group1 = 0 ;
 		int group2 = size / 3  ;
@@ -54,7 +54,7 @@ public class Graph {
 			float f = random.nextFloat() ; 
 
 			do {
-				if( f < 0.125f ) {
+				if( f < 0.1f ) {
 					edge.to = ix[ random.nextInt( size ) ]  ;
 				} else {
 					edge.to = ix[ random.nextInt( size/3 ) + g ]  ;
@@ -81,13 +81,13 @@ public class Graph {
 		
 		this.N = N ;
 		adjacency 		= new int[N*N] ;
-		connectivity 	= new int[N] ;
+		degree		 	= new int[N] ;
 		laplacian 		= new int[N*N] ;
 		
 		// build D matrix
 		for( Edge e : edges ) {
-			connectivity[e.from]++ ; 
-			connectivity[e.to]++ ; 
+			degree[e.from]++ ; 
+			degree[e.to]++ ; 
 		}
 		log.info( "Created D" );
 
@@ -104,8 +104,8 @@ public class Graph {
 		for( int i=0 ; i<laplacian.length ; i++ ) {
 			laplacian[i] = -adjacency[i] ; 
 		}
-		for( int i=0 ; i<connectivity.length ; i++ ) {
-			laplacian[i*(N+1)] = connectivity[i] ; 
+		for( int i=0 ; i<degree.length ; i++ ) {
+			laplacian[i*(N+1)] = degree[i] ; 
 		}
 		log.info( "Created Laplacian" );
 
@@ -178,16 +178,28 @@ public class Graph {
 		//log.info( "Sorted ev = {}", sev ) ;
 		int rc = 1 ;
 		double mxg = 0.0 ;
+		double mx = sev[0] ;
+		double mn = mx ;
 		for( int i=1 ; i<sev.length ; i++ ) {
-			double grad = sev[i] - sev[i-i] ;
-			if( grad>mxg ) {
+			mx = Math.max( mx,  sev[i] ) ;
+			mn = Math.min( mn,  sev[i] ) ;
+		}
+		double range = mx - mn ;
+		for( int i=0 ; i<sev.length ; i++ ) {
+			sev[i] = ( sev[i] - mn ) / range ;
+		}
+		
+		for( int i=1 ; i<sev.length ; i++ ) {
+			double grad = sev[i] - sev[i-1]  ;
+			if( grad>0.05 ) {
 				mxg = grad ;
 				rc = i ;
+				break ;
 			}
-			log.info( "{}\t{}", grad, mxg ) ;
+			//log.info( "{}\t{}", grad, mxg ) ;
 		}
 		log.info( "Partition = {}, dy/dx = {}", rc, mxg ) ;
-		return rc ;
+		return rc>2 ? rc-1 : rc ;
 	}
 
 }

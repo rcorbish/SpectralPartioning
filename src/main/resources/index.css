@@ -178,24 +178,24 @@ input[type=range]:-moz-focusring{
 
 #e-value {
 	position: absolute ;
-	top: 10px  ;
+	top: 5px  ;
 	right: 50px ;
 	z-index: 10 ;
 	width: 100px ;
 	color: white ;
 	background-color: transparent ;
-	font-size: 7pt ;	
+	font-size: 12pt ;	
 	border: none ;
 }
 #e-gap {
 	position: absolute ;
-	top: 10px  ;
-	right: 170px ;
+	top: 5px  ;
+	right: 100px ;
 	z-index: 10 ;
-	width: 100px ;
+	width: 160px ;
 	color: white ;
 	background-color: transparent ;
-	font-size: 7pt ;	
+	font-size: 12pt ;	
 	border: none ;
 }
 #e-norm {

@@ -30,7 +30,7 @@ public class Monitor implements AutoCloseable {
 	final Gson gson ;
 	final Graph graph ;
 	
-	final int N = 127 ;
+	final int N = 200 ;
 	{
 		gson = new Gson();
 		random = new Random() ;	
