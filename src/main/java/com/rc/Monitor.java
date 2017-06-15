@@ -1,7 +1,9 @@
 package com.rc;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Random;
 
 import org.slf4j.Logger;
@@ -30,11 +32,15 @@ public class Monitor implements AutoCloseable {
 	final Gson gson ;
 	final Graph graph ;
 	
-	final int N = 200 ;
-	{
+	public Monitor( Path path ) throws IOException {	
 		gson = new Gson();
 		random = new Random() ;	
-		graph = Graph.random(N) ;
+		graph = Graph.create( path ) ;
+	}
+	public Monitor() {	
+		gson = new Gson();
+		random = new Random() ;	
+		graph = Graph.random( 200 ) ;
 	}
 	
 	
@@ -60,15 +66,17 @@ public class Monitor implements AutoCloseable {
 		try {
 			String tmp = java.net.URLDecoder.decode( req.params( INDEX_PARAM ), "UTF-8" ) ;
 			int eigenvalueIndex = Integer.parseInt(tmp) ; 
-			log.info( "REST call to getData({})", eigenvalueIndex ) ;
+			log.debug( "REST call to getData({})", eigenvalueIndex ) ;
 			
-			double eigenvectors[] = new double[N*N] ;
 			rsp.type( "application/json" );	
 			rsp.header("expires", "0" ) ;
 			rsp.header("cache-control", "no-cache" ) ;
 						
 			ResponseMessage responseMessage = new ResponseMessage() ;
 
+			int N = graph.getN() ;
+			double eigenvectors[] = new double[N*N] ;
+			
 			if( eigenvalueIndex < 0 ) eigenvalueIndex = 0 ;
 			if( eigenvalueIndex >= N ) eigenvalueIndex = N-1 ;
 
@@ -96,7 +104,7 @@ public class Monitor implements AutoCloseable {
 	static class ResponseMessage {
 		int N ;
 		int partition ;
-		int surface[] ;
+		double surface[] ;
 		double eigenvalues[] ;
 		double eigenvector[] ;
 	}

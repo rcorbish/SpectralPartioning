@@ -42,7 +42,7 @@ the laplacian matrix plotted in color. It will be sorted according to the
 sort of the eigenvectors. Clusters can be seen using the new sort order.
 
 ### Hints
-The clusters are seen at the Fiedler value ( &labmda; 1 )
+The clusters are seen at the Fiedler value ( &labmda; <sub>1</sub> )
 ## todo
 Make this recursive to spot clusters repeatedly.
  

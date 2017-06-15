@@ -21,9 +21,8 @@ public class Graph {
 
 	private final int N ;
 	
-	private final int adjacency[] ;
-	private final int degree[] ;
-	private final int laplacian[] ;
+	private final double adjacency[] ;
+	private final double degree[] ;
 
 
 	public static Graph random( int size ) {
@@ -66,7 +65,11 @@ public class Graph {
 
 		log.info( "Created {} edges",  size );
 
-		return new Graph( edges, size ) ;
+		Graph graph = new Graph( size ) ;
+		for( Edge edge : edges ) {
+			graph.addEdge( edge ) ;
+		}
+		return graph ;
 	}
 
 
@@ -74,32 +77,36 @@ public class Graph {
 		CsvReader csvr = new CsvReader( 1,2,3,4,0 ) ;
 		Path p = Paths.get( "edges.csv" ) ;
 		List<Edge> parsedEdges = csvr.parse( p );
-		return new Graph( parsedEdges, csvr.getNumNodes() ) ;		
+		Graph graph = new Graph( csvr.getNumNodes() ) ;
+		for( Edge edge : parsedEdges ) {
+			graph.addEdge( edge ) ;
+		}
+		return graph ;
 	}
 
-	public Graph( List<Edge> edges, int N ) {
-		
+	
+	
+	public Graph( int N ) {		
 		this.N = N ;
-		adjacency 		= new int[N*N] ;
-		degree		 	= new int[N] ;
-		laplacian 		= new int[N*N] ;
-		
+		adjacency 		= new double[N*N] ;
+		degree		 	= new double[N] ;
+	}
+	
+	
+	public void addEdge( Edge edge ) {
 		// build D matrix
-		for( Edge e : edges ) {
-			degree[e.from]++ ; 
-			degree[e.to]++ ; 
-		}
-		log.info( "Created D" );
+		degree[edge.from]++ ; 
+		degree[edge.to]++ ; 
 
 		// build A matrix
-		for( Edge e : edges ) {
-			int ix1 = e.from * N + e.to ;
-			int ix2 = e.to * N + e.from ;
-			adjacency[ix1] ++ ; 
-			adjacency[ix2] ++ ; 
-		}
-		log.info( "Created Adjacency" );
+		int ix1 = edge.from * N + edge.to ;
+		int ix2 = edge.to * N + edge.from ;
+		adjacency[ix1] += edge.weight ; 
+		adjacency[ix2] += edge.weight ; 
+	}
 
+	public double[] getLaplacian() {
+		double laplacian[] = new double [ adjacency.length ] ;
 		// build L matrix
 		for( int i=0 ; i<laplacian.length ; i++ ) {
 			laplacian[i] = -adjacency[i] ; 
@@ -108,13 +115,10 @@ public class Graph {
 			laplacian[i*(N+1)] = degree[i] ; 
 		}
 		log.info( "Created Laplacian" );
-
-	}
-
-	public int[] getLaplacian() {
 		return laplacian ;
 	}
-	public int[] getAdjacency() {
+	
+	public double[] getAdjacency() {
 		return adjacency ;
 	}
 	
@@ -132,8 +136,7 @@ public class Graph {
 			String jobz = "V" ;
 			String uplo = "U" ;
 	
-			a = new double[laplacian.length] ;
-			for( int i=0 ; i<a.length ; i++ ) a[i] = laplacian[i] ;
+			a = getLaplacian() ;
 			
 			int lda = N ;
 			double I[] = new double[N*N] ;
@@ -175,7 +178,7 @@ public class Graph {
 		double sev[] = new double[ev.length] ;
 		System.arraycopy(ev, 0, sev, 0, sev.length );
 		Arrays.sort( sev ) ;
-		//log.info( "Sorted ev = {}", sev ) ;
+
 		int rc = 1 ;
 		double mxg = 0.0 ;
 		double mx = sev[0] ;
@@ -202,12 +205,16 @@ public class Graph {
 		return rc>2 ? rc-1 : rc ;
 	}
 
+	public int getN() {
+		return N ;
+	}
 }
 
 
 class Edge implements Comparable<Edge> {
 	int from ;
 	int to ;
+	double weight = 1.0 ;
 	
 	public int compareTo( Edge o ) {
 		return from==o.from ? to - o.to : from - o.from ;
