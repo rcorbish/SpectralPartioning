@@ -25,4 +25,4 @@ java -cp $CP \
 	-XX:+UseG1GC \
 	-XX:+UseStringDeduplication \
 	-XX:MaxGCPauseMillis=200 \
-	${JAVA_ARGS}
+	${JAVA_ARGS} $@

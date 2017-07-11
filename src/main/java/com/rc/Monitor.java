@@ -1,7 +1,9 @@
 package com.rc;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Random;
 
 import org.slf4j.Logger;
@@ -30,11 +32,17 @@ public class Monitor implements AutoCloseable {
 	final Gson gson ;
 	final Graph graph ;
 	
-	final int N = 127 ;
-	{
+	public Monitor() {
+		final int N = 512 ;
 		gson = new Gson();
 		random = new Random() ;	
 		graph = Graph.random(N) ;
+	}
+	
+	public Monitor(Path path) throws IOException {
+		gson = new Gson();
+		random = new Random() ;	
+		graph = Graph.create(path) ;
 	}
 	
 	
@@ -61,7 +69,9 @@ public class Monitor implements AutoCloseable {
 			String tmp = java.net.URLDecoder.decode( req.params( INDEX_PARAM ), "UTF-8" ) ;
 			int eigenvalueIndex = Integer.parseInt(tmp) ; 
 			log.info( "REST call to getData({})", eigenvalueIndex ) ;
-			
+
+			final int N = graph.getN() ;
+
 			double eigenvectors[] = new double[N*N] ;
 			rsp.type( "application/json" );	
 			rsp.header("expires", "0" ) ;
@@ -96,7 +106,7 @@ public class Monitor implements AutoCloseable {
 	static class ResponseMessage {
 		int N ;
 		int partition ;
-		int surface[] ;
+		double surface[] ;
 		double eigenvalues[] ;
 		double eigenvector[] ;
 	}

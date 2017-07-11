@@ -272,7 +272,6 @@
 
 //			var t =	responseMessage.eigenvector.reduce( function(p,x) { return  p + x*x ; }, 0 ) ; 			
 //			document.getElementById( "e-norm" ).innerHTML =  "|x|=" + Math.sqrt(t)  ;
-
 		}
 
 		
@@ -340,9 +339,16 @@
 					y = h - ( ( data[i] - mn ) / range * h ) ;
 					ctx.lineTo( x+25, y+25 );
 				}
-				ctx.stroke();
-				
+				ctx.stroke();				
 			}
+
+			ctx.beginPath();
+			ctx.strokeStyle="yellow" ;
+			ctx.lineWidth = 1 ;
+			const xBound = 25 + ( responseMessage.partition / responseMessage.N ) * w ;
+			ctx.moveTo( xBound, 25 )
+			ctx.lineTo( xBound, h+25 ) ;
+			ctx.stroke();
 		}
 
 		
@@ -416,11 +422,13 @@
 					ctx.putImageData( pixelImage, x+25, y+25 ) ;
 				}
 					
+				const xBound = ( responseMessage.partition / responseMessage.N ) ;
+
 				ctx.beginPath();
 				ctx.strokeStyle="yellow" ;
-				ctx.lineWidth = 3 ;
+				ctx.lineWidth = 1 ;
 				
-				ctx.rect( 25, 25, 25 + responseMessage.partition * pixelW, 25 + responseMessage.partition * pixelH ) ;
+				ctx.rect( 25, 25, xBound * w, xBound * h ) ;
 				ctx.stroke();
 			}
 		}

@@ -21,9 +21,8 @@ public class Graph {
 
 	private final int N ;
 	
-	private final int adjacency[] ;
-	private final int connectivity[] ;
-	private final int laplacian[] ;
+	private final double adjacency[] ;
+	private final double connectivity[] ;
 
 
 	public static Graph random( int size ) {
@@ -38,7 +37,7 @@ public class Graph {
 		int ix[] = new int[size] ;
 		for( int i=0 ; i<size ; i++ ) ix[i] = ixt.get(i) ;
 
-		int E = size * 20  ;
+		int E = size * 200  ;
 		List<Edge> edges = new ArrayList<>() ;
 		int group1 = 0 ;
 		int group2 = size / 3  ;
@@ -54,7 +53,7 @@ public class Graph {
 			float f = random.nextFloat() ; 
 
 			do {
-				if( f < 0.125f ) {
+				if( f < 0.5f ) {
 					edge.to = ix[ random.nextInt( size ) ]  ;
 				} else {
 					edge.to = ix[ random.nextInt( size/3 ) + g ]  ;
@@ -66,40 +65,43 @@ public class Graph {
 
 		log.info( "Created {} edges",  size );
 
-		return new Graph( edges, size ) ;
+		Graph rc = new Graph( size ) ;
+
+		for( Edge edge : edges ) rc.addEdge(edge);
+		return rc ;		
 	}
 
 
 	public static Graph create( Path path ) throws IOException {
-		CsvReader csvr = new CsvReader( 1,2,3,4,0 ) ;
-		Path p = Paths.get( "edges.csv" ) ;
-		List<Edge> parsedEdges = csvr.parse( p );
-		return new Graph( parsedEdges, csvr.getNumNodes() ) ;		
+		CsvReader csvr = new CsvReader( 0,1,2,3 ) ;
+
+		List<Edge> parsedEdges = csvr.parse( path );
+		Graph rc = new Graph( csvr.getNumNodes() ) ;
+		for( Edge edge : parsedEdges ) rc.addEdge(edge);
+		return rc ;		
 	}
 
-	public Graph( List<Edge> edges, int N ) {
-		
-		this.N = N ;
-		adjacency 		= new int[N*N] ;
-		connectivity 	= new int[N] ;
-		laplacian 		= new int[N*N] ;
-		
+	public void addEdge( Edge edge ) {
 		// build D matrix
-		for( Edge e : edges ) {
-			connectivity[e.from]++ ; 
-			connectivity[e.to]++ ; 
-		}
-		log.info( "Created D" );
+			connectivity[edge.from]+= edge.weight  ; 
+			connectivity[edge.to]+= edge.weight ;
 
 		// build A matrix
-		for( Edge e : edges ) {
-			int ix1 = e.from * N + e.to ;
-			int ix2 = e.to * N + e.from ;
+			int ix1 = edge.from * N + edge.to ;
+			int ix2 = edge.to * N + edge.from ;
 			adjacency[ix1] ++ ; 
-			adjacency[ix2] ++ ; 
-		}
-		log.info( "Created Adjacency" );
+			adjacency[ix2] ++ ; 		
+	}
 
+	public Graph( int N ) {
+		
+		this.N = N ;
+		adjacency 		= new double[N*N] ;
+		connectivity 	= new double[N] ;
+	}
+
+	public double[] getLaplacian() {
+		double [] laplacian = new double[N*N] ;
 		// build L matrix
 		for( int i=0 ; i<laplacian.length ; i++ ) {
 			laplacian[i] = -adjacency[i] ; 
@@ -109,18 +111,19 @@ public class Graph {
 		}
 		log.info( "Created Laplacian" );
 
-	}
-
-	public int[] getLaplacian() {
 		return laplacian ;
 	}
-	public int[] getAdjacency() {
+	public double[] getAdjacency() {
 		return adjacency ;
 	}
 	
 	public double[] eigenValues() {
 		return eigenValues( null ) ;
 	} 
+
+	public int getN() {
+		return N ;
+	}
 
 	public synchronized double[] eigenValues( double[] v ) {
 
@@ -132,8 +135,7 @@ public class Graph {
 			String jobz = "V" ;
 			String uplo = "U" ;
 	
-			a = new double[laplacian.length] ;
-			for( int i=0 ; i<a.length ; i++ ) a[i] = laplacian[i] ;
+			a = getLaplacian() ;
 			
 			int lda = N ;
 			double I[] = new double[N*N] ;
@@ -179,14 +181,25 @@ public class Graph {
 		int rc = 1 ;
 		double mxg = 0.0 ;
 		for( int i=1 ; i<sev.length ; i++ ) {
-			double grad = sev[i] - sev[i-i] ;
+			double grad = sev[i] - sev[i-1] ;
 			if( grad>mxg ) {
 				mxg = grad ;
 				rc = i ;
+				if( mxg > 0.025 ) break ;
 			}
-			log.info( "{}\t{}", grad, mxg ) ;
+			//log.info( "{}\t{}", grad, mxg ) ;
 		}
 		log.info( "Partition = {}, dy/dx = {}", rc, mxg ) ;
+/*
+		for( int i=0 ; i<Math.min(rc,10) ; i++ ) {
+			for( int j=0 ; j<ev.length ; j++ ) {
+				if( ev[j] == sev[i] ) {
+					log.info( "Item {} -> {}", i, j ) ;
+					break ;
+				}
+			}
+		}
+*/		
 		return rc ;
 	}
 
@@ -196,7 +209,8 @@ public class Graph {
 class Edge implements Comparable<Edge> {
 	int from ;
 	int to ;
-	
+	double weight = 1.0 ;
+
 	public int compareTo( Edge o ) {
 		return from==o.from ? to - o.to : from - o.from ;
 	}
