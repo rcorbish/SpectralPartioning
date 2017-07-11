@@ -106,8 +106,8 @@ public class Graph {
 		for( int i=0 ; i<laplacian.length ; i++ ) {
 			laplacian[i] = -adjacency[i] ; 
 		}
-		for( int i=0 ; i<connectivity.length ; i++ ) {
-			laplacian[i*(N+1)] = connectivity[i] ; 
+		for( int i=0 ; i<degree.length ; i++ ) {
+			laplacian[i*(N+1)] = degree[i] ; 
 		}
 		log.info( "Created Laplacian" );
 
@@ -177,9 +177,11 @@ public class Graph {
 		double sev[] = new double[ev.length] ;
 		System.arraycopy(ev, 0, sev, 0, sev.length );
 		Arrays.sort( sev ) ;
-		//log.info( "Sorted ev = {}", sev ) ;
+
 		int rc = 1 ;
 		double mxg = 0.0 ;
+		double mx = sev[0] ;
+		double mn = mx ;
 		for( int i=1 ; i<sev.length ; i++ ) {
 			double grad = sev[i] - sev[i-1] ;
 			if( grad>mxg ) {
@@ -203,6 +205,9 @@ public class Graph {
 		return rc ;
 	}
 
+	public int getN() {
+		return N ;
+	}
 }
 
 
@@ -210,7 +215,6 @@ class Edge implements Comparable<Edge> {
 	int from ;
 	int to ;
 	double weight = 1.0 ;
-
 	public int compareTo( Edge o ) {
 		return from==o.from ? to - o.to : from - o.from ;
 	}

@@ -36,7 +36,12 @@ public class Monitor implements AutoCloseable {
 		final int N = 512 ;
 		gson = new Gson();
 		random = new Random() ;	
-		graph = Graph.random(N) ;
+		graph = Graph.create( path ) ;
+	}
+	public Monitor() {	
+		gson = new Gson();
+		random = new Random() ;	
+		graph = Graph.random( 200 ) ;
 	}
 	
 	public Monitor(Path path) throws IOException {
@@ -79,6 +84,9 @@ public class Monitor implements AutoCloseable {
 						
 			ResponseMessage responseMessage = new ResponseMessage() ;
 
+			int N = graph.getN() ;
+			double eigenvectors[] = new double[N*N] ;
+			
 			if( eigenvalueIndex < 0 ) eigenvalueIndex = 0 ;
 			if( eigenvalueIndex >= N ) eigenvalueIndex = N-1 ;
 

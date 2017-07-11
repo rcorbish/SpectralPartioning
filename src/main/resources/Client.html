@@ -39,8 +39,8 @@
 			opacity : 1.0,
 			color : 0xffffff,
 			wireframe : false,
-			metalness : 0.65,
-			roughness : 0.3
+			metalness : 0.85,
+			roughness : 0.2
 		});
 		
 		const canvas3d = document.getElementById("canvas-3d");
@@ -199,7 +199,7 @@
 			light3.position.set(-1000, 1700, 0);
 			scene.add(light3);
 
-			const light4 = new THREE.DirectionalLight(0x00ff00, 1.0);
+			const light4 = new THREE.DirectionalLight(0xffff00, 1.0);
 			light4.position.set(0, -1000, 0);
 			scene.add(light4);
 
@@ -268,7 +268,7 @@
 			ctx.fill();
 			
 			document.getElementById( "e-value" ).innerHTML = "&lambda;=" + responseMessage.eigenvalues[eigenvalueIndex].toFixed(4) ;
-			document.getElementById( "e-gap" ).innerHTML =  eigenvalueIndex>0 ? ( "gap=" + (responseMessage.eigenvalues[eigenvalueIndex] - responseMessage.eigenvalues[eigenvalueIndex-1]).toFixed(4) ) : "n/a" ;
+//			document.getElementById( "e-gap" ).innerHTML =  eigenvalueIndex>0 ? ( "gap=" + (responseMessage.eigenvalues[eigenvalueIndex] - responseMessage.eigenvalues[eigenvalueIndex-1]).toFixed(4) ) : "n/a" ;
 
 //			var t =	responseMessage.eigenvector.reduce( function(p,x) { return  p + x*x ; }, 0 ) ; 			
 //			document.getElementById( "e-norm" ).innerHTML =  "|x|=" + Math.sqrt(t)  ;
@@ -339,7 +339,22 @@
 					y = h - ( ( data[i] - mn ) / range * h ) ;
 					ctx.lineTo( x+25, y+25 );
 				}
+<<<<<<< HEAD
 				ctx.stroke();				
+=======
+				ctx.stroke();
+
+				
+				ctx.beginPath();
+				ctx.strokeStyle="yellow" ;
+				ctx.setLineDash([1, 2]);/*dashes are 1px and spaces are 2px*/
+				ctx.lineWidth = 1 ;
+				x = ( responseMessage.partition / responseMessage.N ) * w ;				
+				ctx.moveTo( x+25, y+25 );
+				ctx.lineTo( x+25, y+25+h );
+				ctx.stroke();
+
+>>>>>>> 1dbdb6d91fcbad59045f27c7f5913ba30b1df7a0
 			}
 
 			ctx.beginPath();
@@ -426,9 +441,19 @@
 
 				ctx.beginPath();
 				ctx.strokeStyle="yellow" ;
+<<<<<<< HEAD
 				ctx.lineWidth = 1 ;
 				
 				ctx.rect( 25, 25, xBound * w, xBound * h ) ;
+=======
+				ctx.lineWidth = 3 ;
+				ctx.setLineDash([1, 2]);/*dashes are 1px and spaces are 2px*/
+				
+				x = ( responseMessage.partition / responseMessage.N ) * w ;				
+				y = ( responseMessage.partition / responseMessage.N ) * h ;
+
+				ctx.rect( 25, 25, x, y ) ;
+>>>>>>> 1dbdb6d91fcbad59045f27c7f5913ba30b1df7a0
 				ctx.stroke();
 			}
 		}
