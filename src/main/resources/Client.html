@@ -339,11 +339,7 @@
 					y = h - ( ( data[i] - mn ) / range * h ) ;
 					ctx.lineTo( x+25, y+25 );
 				}
-<<<<<<< HEAD
 				ctx.stroke();				
-=======
-				ctx.stroke();
-
 				
 				ctx.beginPath();
 				ctx.strokeStyle="yellow" ;
@@ -354,7 +350,6 @@
 				ctx.lineTo( x+25, y+25+h );
 				ctx.stroke();
 
->>>>>>> 1dbdb6d91fcbad59045f27c7f5913ba30b1df7a0
 			}
 
 			ctx.beginPath();
@@ -441,19 +436,9 @@
 
 				ctx.beginPath();
 				ctx.strokeStyle="yellow" ;
-<<<<<<< HEAD
 				ctx.lineWidth = 1 ;
 				
 				ctx.rect( 25, 25, xBound * w, xBound * h ) ;
-=======
-				ctx.lineWidth = 3 ;
-				ctx.setLineDash([1, 2]);/*dashes are 1px and spaces are 2px*/
-				
-				x = ( responseMessage.partition / responseMessage.N ) * w ;				
-				y = ( responseMessage.partition / responseMessage.N ) * h ;
-
-				ctx.rect( 25, 25, x, y ) ;
->>>>>>> 1dbdb6d91fcbad59045f27c7f5913ba30b1df7a0
 				ctx.stroke();
 			}
 		}

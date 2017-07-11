@@ -22,7 +22,7 @@ public class Graph {
 	private final int N ;
 	
 	private final double adjacency[] ;
-	private final double connectivity[] ;
+	private final double degree[] ;
 
 
 	public static Graph random( int size ) {
@@ -83,8 +83,8 @@ public class Graph {
 
 	public void addEdge( Edge edge ) {
 		// build D matrix
-			connectivity[edge.from]+= edge.weight  ; 
-			connectivity[edge.to]+= edge.weight ;
+			degree[edge.from]+= edge.weight  ; 
+			degree[edge.to]+= edge.weight ;
 
 		// build A matrix
 			int ix1 = edge.from * N + edge.to ;
@@ -97,7 +97,7 @@ public class Graph {
 		
 		this.N = N ;
 		adjacency 		= new double[N*N] ;
-		connectivity 	= new double[N] ;
+		degree 	= new double[N] ;
 	}
 
 	public double[] getLaplacian() {
@@ -191,22 +191,8 @@ public class Graph {
 			}
 			//log.info( "{}\t{}", grad, mxg ) ;
 		}
-		log.info( "Partition = {}, dy/dx = {}", rc, mxg ) ;
-/*
-		for( int i=0 ; i<Math.min(rc,10) ; i++ ) {
-			for( int j=0 ; j<ev.length ; j++ ) {
-				if( ev[j] == sev[i] ) {
-					log.info( "Item {} -> {}", i, j ) ;
-					break ;
-				}
-			}
-		}
-*/		
+		log.info( "Partition = {}, dy/dx = {}", rc, mxg ) ;	
 		return rc ;
-	}
-
-	public int getN() {
-		return N ;
 	}
 }
 

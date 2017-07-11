@@ -32,12 +32,7 @@ public class Monitor implements AutoCloseable {
 	final Gson gson ;
 	final Graph graph ;
 	
-	public Monitor() {
-		final int N = 512 ;
-		gson = new Gson();
-		random = new Random() ;	
-		graph = Graph.create( path ) ;
-	}
+
 	public Monitor() {	
 		gson = new Gson();
 		random = new Random() ;	
@@ -75,9 +70,6 @@ public class Monitor implements AutoCloseable {
 			int eigenvalueIndex = Integer.parseInt(tmp) ; 
 			log.info( "REST call to getData({})", eigenvalueIndex ) ;
 
-			final int N = graph.getN() ;
-
-			double eigenvectors[] = new double[N*N] ;
 			rsp.type( "application/json" );	
 			rsp.header("expires", "0" ) ;
 			rsp.header("cache-control", "no-cache" ) ;
