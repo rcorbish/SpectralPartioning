@@ -40,8 +40,8 @@ public class Monitor implements AutoCloseable {
 	public Monitor() {	
 		gson = new Gson();
 		random = new Random() ;	
-		graph = Graph.random( 200 ) ;
-	}
+		graph = Graph.random( 500 ) ;
+	} 
 	
 	
 	public void start() {
@@ -58,7 +58,6 @@ public class Monitor implements AutoCloseable {
 	}
 
 	/**
-	 * get 1 slice of compressed data, with random shear
 	 * 
 	 */
 	public Object getData(Request req, Response rsp) {

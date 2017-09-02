@@ -9,8 +9,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+
 
 public class TestCsvReader {
 
@@ -36,16 +39,16 @@ public class TestCsvReader {
 	@Test
 	public void testCsvReader() {
 		CsvReader test = new CsvReader( 0,1,2,3 ) ;
-		assertNotNull( "Failed to create CsvReader", test );
+		Assert.assertNotNull( "Failed to create CsvReader", test );
 	}
 
 	@Test
 	public void testParse() throws IOException {
 		CsvReader test = new CsvReader( 0,1,2,3 ) ;
-		assertNotNull( "Failed to create CsvReader", test );
+		Assert.assertNotNull( "Failed to create CsvReader", test );
 		
 		List<Edge> edges = test.parse( testData.toPath() );
-		assertNotEquals("Empty edge list", 0, edges.size() ) ;
+		Assert.assertNotEquals("Empty edge list", 0, edges.size() ) ;
 	}
 
 }
