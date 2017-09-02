@@ -37,7 +37,7 @@ public class Graph {
 		int ix[] = new int[size] ;
 		for( int i=0 ; i<size ; i++ ) ix[i] = ixt.get(i) ;
 
-		int E = size * 200  ;
+		int E = size * 500  ;
 		List<Edge> edges = new ArrayList<>() ;
 		int group1 = 0 ;
 		int group2 = size / 3  ;
@@ -53,13 +53,12 @@ public class Graph {
 			float f = random.nextFloat() ; 
 
 			do {
-				if( f < 0.5f ) {
+				if( f < 0.004f ) {
 					edge.to = ix[ random.nextInt( size ) ]  ;
-				} else {
+				} else  {
 					edge.to = ix[ random.nextInt( size/3 ) + g ]  ;
 				}
 			} while( edge.to == edge.from ) ;
-			
 			edges.add( edge ) ;
 		}
 
@@ -72,8 +71,8 @@ public class Graph {
 	}
 
 
-	public static Graph create( Path path ) throws IOException {
-		CsvReader csvr = new CsvReader( 0,1,2,3 ) ;
+	public static Graph create( Path path, int ... indices ) throws IOException {
+		CsvReader csvr = new CsvReader( indices ) ;
 
 		List<Edge> parsedEdges = csvr.parse( path );
 		Graph rc = new Graph( csvr.getNumNodes() ) ;

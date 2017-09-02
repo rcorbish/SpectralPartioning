@@ -21,6 +21,16 @@ body {
 	z-index: 100 ;
 }
 
+#partition {
+	position: absolute ;
+	top: 0 ;
+	left: 0 ;
+	padding: 0 ;
+	background-color: #1f0c45 ;
+	border-color: navy ;
+	color: antiquewhite ;
+	z-index: 200 ;
+}
 
 .network line {
   stroke: #999;

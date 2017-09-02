@@ -17,6 +17,7 @@ public class CsvReader {
 	final static Logger log = LoggerFactory.getLogger( CsvReader.class ) ;
 
 	private final int columnIndices[] ;
+	private final int maxIndex ;
 	
 	private final List< Set<String>> nodes ;
 	private String nodeTexts[][] ;
@@ -25,9 +26,12 @@ public class CsvReader {
 	public CsvReader( int ... indices ) {
 		this.columnIndices = indices ;
 		this.nodes = new ArrayList<>() ;
+		int mx = indices[0] ;
 		for( int i=0 ; i<indices.length ; i++ ) {
 			this.nodes.add( new HashSet<>() ) ;
+			mx = Math.max(mx, indices[i] ) ;
 		}
+		maxIndex = mx ;
 		this.nodeIndexStart = new int[indices.length] ; 
 		log.info( "Created csv reader with {} columns", indices.length ) ;
 	}
@@ -40,7 +44,7 @@ public class CsvReader {
 		Files.lines(path)
 			.parallel()
 			.map( s -> s.split("\\,") )
-			.filter( s -> s.length>=columnIndices.length )
+			.filter( s -> s.length>maxIndex )
 			.forEach( this::nodeMapper ) 
 			;
 
@@ -60,7 +64,7 @@ public class CsvReader {
 		List<Edge> edges = Files.lines(path)
 			.parallel()
 			.map( s -> s.split("\\,") )
-			.filter( s -> s.length>=columnIndices.length )
+			.filter( s -> s.length>maxIndex )
 			.map( this::edgeMapper )
 			.reduce( new ArrayList<Edge>(), (a,b) -> { a.addAll(b) ; return a ; } )
 			; 
@@ -75,9 +79,6 @@ public class CsvReader {
 	}
 	
 	protected void nodeMapper( String cols[] ) {
-		assert cols.length == columnIndices.length ;
-		log.info( "Reading {}", (Object)cols ) ;
-		log.info( "Nodes {}", nodes ) ;
 		
 		for( int i=0 ; i<columnIndices.length ; i++ ) {
 			int columnIndex = columnIndices[i] ;
@@ -97,9 +98,10 @@ public class CsvReader {
 				int toColumnIndex = columnIndices[j] ;
 				String to = cols[toColumnIndex] ;
 								
+				log.debug( "From {} to {}", fromColumnIndex, toColumnIndex ) ;
 				Edge edge = new Edge() ;
-				edge.from = nodeIndexStart[i] + Arrays.binarySearch( nodeTexts[fromColumnIndex], from ) ;
-				edge.to   = nodeIndexStart[j] + Arrays.binarySearch( nodeTexts[toColumnIndex], to ) ;
+				edge.from = nodeIndexStart[i] + Arrays.binarySearch( nodeTexts[i/*fromColumnIndex*/], from ) ;
+				edge.to   = nodeIndexStart[j] + Arrays.binarySearch( nodeTexts[j/*toColumnIndex*/], to ) ;
 				
 				rc.add( edge ) ;	
 			}

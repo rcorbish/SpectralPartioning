@@ -33,16 +33,16 @@ public class Monitor implements AutoCloseable {
 	final Graph graph ;
 	
 
-	public Monitor() {	
+	public Monitor( int size ) {	
 		gson = new Gson();
 		random = new Random() ;	
-		graph = Graph.random( 200 ) ;
+		graph = Graph.random( size ) ;
 	}
 	
-	public Monitor(Path path) throws IOException {
+	public Monitor(Path path, int ... indices ) throws IOException {
 		gson = new Gson();
 		random = new Random() ;	
-		graph = Graph.create(path) ;
+		graph = Graph.create(path, indices ) ;
 	}
 	
 	
@@ -69,6 +69,21 @@ public class Monitor implements AutoCloseable {
 			String tmp = java.net.URLDecoder.decode( req.params( INDEX_PARAM ), "UTF-8" ) ;
 			int eigenvalueIndex = Integer.parseInt(tmp) ; 
 			log.info( "REST call to getData({})", eigenvalueIndex ) ;
+
+			tmp = req.queryParams( "cut" ) ;
+			int cut[] = null ;
+			if( tmp != null ) {
+				try {
+					String cuts[] = tmp.split("," ) ;
+					cut = new int[cuts.length] ;
+					for( int i=0 ; i<cut.length ; i++ ) {
+						cut[i] = Integer.parseInt( cuts[i] ) ;
+					}
+					log.info( "Cutting graph at {}", cut ) ;
+				} catch( Throwable t ) {
+					log.error( "Cannot parse {} to integer for cut param", tmp ) ;
+				}
+			}
 
 			rsp.type( "application/json" );	
 			rsp.header("expires", "0" ) ;

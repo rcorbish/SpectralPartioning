@@ -10,6 +10,7 @@
 </head>
 <body>
 
+	<button id='partition'>Cut</button>
 	<div id="canvas-3d"></div>
 	<canvas id="canvas-2d-vals"></canvas>
 	<canvas id="canvas-2d-vect"></canvas>
@@ -32,7 +33,7 @@
 		var texture;
 		var sortEigenvectors = true ;
 		var eigenvalueIndex = 1 ;
-
+		var partitionIndex ;
 		
 		const material = new THREE.MeshStandardMaterial({
 			side : THREE.DoubleSide,
@@ -74,6 +75,9 @@
 					mesh.geometry = geometry ;
 				}
 
+				if( partitionIndex === undefined ) {
+					partitionIndex = responseMessage.partition ;
+				}
 				
 				canvas3d.width = canvas3d.width ;
 
@@ -88,8 +92,9 @@
 		const xhr = new XMLHttpRequest();
 		xhr.addEventListener("load", processData);
 
-		function getData() {
-			xhr.open("GET", "/data/" + eigenvalueIndex ) ;
+		function getData( cut ) {
+			const cutSpec = cut===undefined ? "" : ("?cut=" + cut) ;
+			xhr.open("GET", "/data/" + eigenvalueIndex + cutSpec ) ;
 			xhr.send();
 		}
 
@@ -130,6 +135,7 @@
 				if( !sortEigenvectors ) {
 					sortOrder = null ; 
 				}
+				partitionIndex = undefined
 				plotVector() ;
 				plotCluster() ;
 			});
@@ -142,16 +148,31 @@
 
 				if( eigenvalueIndex<0 ) eigenvalueIndex = 0 ;
 				if( eigenvalueIndex>=responseMessage.eigenvalues.length ) eigenvalueIndex=responseMessage.eigenvalues.length -1 ;
+				partitionIndex = undefined
 				getData() ;
 				
 				eIndex.value = eigenvalueIndex ; 
 			});
+
+			canvas2dClus.addEventListener('click', function(evt) {
+				var x = evt.offsetX  ;
+				const w = clientWidth - 50 ;
+				x = ( x - 25 ) * responseMessage.N / w ; 
+
+				partitionIndex = Math.floor( x ) ;
+
+				if( partitionIndex<0 ) partitionIndex = 0 ;
+				if( partitionIndex>=responseMessage.N ) partitionIndex=responseMessage.N - 1 ;
+				getData() ;
+			});
+
 
 			eIndex.value = eigenvalueIndex ;
 			eIndex.addEventListener('change', function(evt) {
 				eigenvalueIndex = this.valueAsNumber ;
 				if( eigenvalueIndex<0 ) eigenvalueIndex = 0 ;
 				if( eigenvalueIndex>=responseMessage.eigenvalues.length ) eigenvalueIndex=responseMessage.eigenvalues.length -1 ;
+				partitionIndex = undefined
 				getData() ;
 				eIndex.value = eigenvalueIndex ; 
 			}) ;
@@ -159,8 +180,18 @@
 			init();
 			resize();
 			animate();
+
+			const partition = document.querySelector( "#partition" ) 
+			partition.addEventListener( "click", cutgraph ) ;
 		});
 
+		function cutgraph() {
+			var cuts = [] 
+			for( var i=0 ; i<responseMessage.partition ; i++ ) {
+				cuts.push( sortOrder ? sortOrder[i] : i ) 
+			}
+			getData( cuts.join() )
+		}
 		
 		function graphFunction(u, v) {
 			if( !responseMessage ) return new THREE.Vector3(0,0,0);
@@ -188,7 +219,7 @@
 					/ window.innerHeight, 1, 10000);
 			camera.position.z = 1200;
 
-			const light1 = new THREE.AmbientLight(0xffffff, .2);
+			const light1 = new THREE.AmbientLight(0xffffff, 2);
 			scene.add(light1);
 
 			const light2 = new THREE.DirectionalLight(0xff0000, 1.0);
@@ -345,7 +376,7 @@
 				ctx.strokeStyle="yellow" ;
 				ctx.setLineDash([1, 2]);/*dashes are 1px and spaces are 2px*/
 				ctx.lineWidth = 1 ;
-				x = ( responseMessage.partition / responseMessage.N ) * w ;				
+				x = ( partitionIndex / responseMessage.N ) * w ;				
 				ctx.moveTo( x+25, y+25 );
 				ctx.lineTo( x+25, y+25+h );
 				ctx.stroke();
@@ -355,7 +386,7 @@
 			ctx.beginPath();
 			ctx.strokeStyle="yellow" ;
 			ctx.lineWidth = 1 ;
-			const xBound = 25 + ( responseMessage.partition / responseMessage.N ) * w ;
+			const xBound = 25 + ( partitionIndex / responseMessage.N ) * w ;
 			ctx.moveTo( xBound, 25 )
 			ctx.lineTo( xBound, h+25 ) ;
 			ctx.stroke();
@@ -432,7 +463,7 @@
 					ctx.putImageData( pixelImage, x+25, y+25 ) ;
 				}
 					
-				const xBound = ( responseMessage.partition / responseMessage.N ) ;
+				const xBound = ( partitionIndex / responseMessage.N ) ;
 
 				ctx.beginPath();
 				ctx.strokeStyle="yellow" ;

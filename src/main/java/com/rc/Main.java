@@ -16,9 +16,9 @@ public class Main implements AutoCloseable {
 	public Main( String fileName ) throws IOException {
 		Path path = fileName == null ? null : Paths.get(fileName) ;
 		if( path == null ) {
-			m = new Monitor() ;
+			m = new Monitor( 256 ) ;
 		} else {
-			m = new Monitor(path) ;
+			m = new Monitor(path, 1,2,3 ) ;
 		}
 	}
 
