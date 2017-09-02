@@ -5,11 +5,11 @@ html {
 	padding: 0 ;
 	color: #28b1f3 ;
 	background-color: #201864 ;
-	font-family: 'arial' ;
 	overflow: hidden ;
 }
 
 body {
+	font-family: arial, sans-serif ;
 	margin: 0 ;
 	padding: 0 ;
 }
@@ -184,7 +184,11 @@ input[type=range]:-moz-focusring{
 	width: 100px ;
 	color: white ;
 	background-color: transparent ;
+<<<<<<< HEAD
+	font-size: 9pt ;	
+=======
 	font-size: 12pt ;	
+>>>>>>> 1dbdb6d91fcbad59045f27c7f5913ba30b1df7a0
 	border: none ;
 }
 #e-gap {
@@ -195,7 +199,11 @@ input[type=range]:-moz-focusring{
 	width: 160px ;
 	color: white ;
 	background-color: transparent ;
+<<<<<<< HEAD
+	font-size: 9pt ;
+=======
 	font-size: 12pt ;	
+>>>>>>> 1dbdb6d91fcbad59045f27c7f5913ba30b1df7a0
 	border: none ;
 }
 #e-norm {
@@ -206,7 +214,7 @@ input[type=range]:-moz-focusring{
 	width: 100px ;
 	color: white ;
 	background-color: transparent ;
-	font-size: 7pt ;	
+	font-size: 9pt ;	
 	border: none ;
 }
 

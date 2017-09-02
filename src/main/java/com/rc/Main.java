@@ -1,6 +1,7 @@
 package com.rc;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.slf4j.Logger;
@@ -13,12 +14,17 @@ public class Main implements AutoCloseable {
 	final private Monitor m ; 
 	
 	public Main( String fileName ) throws IOException {
-		m = fileName == null ? new Monitor() : new Monitor( Paths.get( fileName) ) ;
+		Path path = fileName == null ? null : Paths.get(fileName) ;
+		if( path == null ) {
+			m = new Monitor() ;
+		} else {
+			m = new Monitor(path) ;
+		}
 	}
 
 	public static void main(String[] args) {
 		try {
-			Main self = new Main( args.length>0 ? args[0] : null ) ;
+			Main self = new Main( args.length>0 ? args[0] : null  ) ;
 			self.start() ;
 		} catch( Throwable t ) {
 			t.printStackTrace() ; 

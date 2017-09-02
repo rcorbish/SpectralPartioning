@@ -32,16 +32,18 @@ public class Monitor implements AutoCloseable {
 	final Gson gson ;
 	final Graph graph ;
 	
-	public Monitor( Path path ) throws IOException {	
-		gson = new Gson();
-		random = new Random() ;	
-		graph = Graph.create( path ) ;
-	}
+
 	public Monitor() {	
 		gson = new Gson();
 		random = new Random() ;	
-		graph = Graph.random( 500 ) ;
-	} 
+		graph = Graph.random( 200 ) ;
+	}
+	
+	public Monitor(Path path) throws IOException {
+		gson = new Gson();
+		random = new Random() ;	
+		graph = Graph.create(path) ;
+	}
 	
 	
 	public void start() {
@@ -65,8 +67,8 @@ public class Monitor implements AutoCloseable {
 		try {
 			String tmp = java.net.URLDecoder.decode( req.params( INDEX_PARAM ), "UTF-8" ) ;
 			int eigenvalueIndex = Integer.parseInt(tmp) ; 
-			log.debug( "REST call to getData({})", eigenvalueIndex ) ;
-			
+			log.info( "REST call to getData({})", eigenvalueIndex ) ;
+
 			rsp.type( "application/json" );	
 			rsp.header("expires", "0" ) ;
 			rsp.header("cache-control", "no-cache" ) ;

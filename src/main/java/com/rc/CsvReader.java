@@ -40,6 +40,7 @@ public class CsvReader {
 		Files.lines(path)
 			.parallel()
 			.map( s -> s.split("\\,") )
+			.filter( s -> s.length>=columnIndices.length )
 			.forEach( this::nodeMapper ) 
 			;
 
@@ -54,12 +55,12 @@ public class CsvReader {
 				nodeIndexStart[i] = nodeIndexStart[i-1] + nodeTexts[i].length ;
 			}
 		}
-
 		log.info( "Sorted column data" ) ;
 
 		List<Edge> edges = Files.lines(path)
 			.parallel()
 			.map( s -> s.split("\\,") )
+			.filter( s -> s.length>=columnIndices.length )
 			.map( this::edgeMapper )
 			.reduce( new ArrayList<Edge>(), (a,b) -> { a.addAll(b) ; return a ; } )
 			; 
@@ -70,10 +71,14 @@ public class CsvReader {
 	}
 
 	public int getNumNodes() {
-		return nodeIndexStart[ columnIndices.length-1 ] + nodeTexts[columnIndices.length].length ;
+		return nodeIndexStart[ columnIndices.length-1 ] + nodeTexts[columnIndices.length-1].length ;
 	}
 	
 	protected void nodeMapper( String cols[] ) {
+		assert cols.length == columnIndices.length ;
+		log.info( "Reading {}", (Object)cols ) ;
+		log.info( "Nodes {}", nodes ) ;
+		
 		for( int i=0 ; i<columnIndices.length ; i++ ) {
 			int columnIndex = columnIndices[i] ;
 			nodes.get(i).add( cols[columnIndex] ) ;
