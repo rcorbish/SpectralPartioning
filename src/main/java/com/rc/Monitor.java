@@ -36,7 +36,7 @@ public class Monitor implements AutoCloseable {
 	public Monitor() {	
 		gson = new Gson();
 		random = new Random() ;	
-		graph = Graph.random( 200 ) ;
+		graph = Graph.random( 100 ) ;
 	}
 	
 	public Monitor(Path path) throws IOException {
@@ -49,7 +49,7 @@ public class Monitor implements AutoCloseable {
 	public void start() {
 		try {			
 			spark.Spark.port( 8111 ) ;
-			URL mainPage = getClass().getClassLoader().getResource( "Client.html" ) ;
+			URL mainPage = getClass().getClassLoader().getResource( "index.html" ) ;
 			File path = new File( mainPage.getPath() ) ;
 			spark.Spark.staticFiles.externalLocation( path.getParent() ) ;
 			spark.Spark.get( "/data/:" + INDEX_PARAM, this::getData, gson::toJson ) ;
