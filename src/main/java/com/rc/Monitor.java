@@ -42,7 +42,7 @@ public class Monitor implements AutoCloseable {
 	public Monitor(Path path, int ... indices ) throws IOException {
 		gson = new Gson();
 		random = new Random() ;	
-		graph = Graph.create(path, indices ) ;
+		graph = Graph.create( path, indices ) ;
 	}
 	
 	

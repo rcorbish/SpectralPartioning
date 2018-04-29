@@ -18,7 +18,9 @@ public class Main implements AutoCloseable {
 		if( path == null ) {
 			m = new Monitor( 256 ) ;
 		} else {
-			m = new Monitor(path, 1,2,3 ) ;
+			int ix[] = new int[26] ;
+			for( int i=0 ; i<ix.length ; i++ ) ix[i] = i + 1 ;
+			m = new Monitor(path, ix ) ;
 		}
 	}
 

@@ -43,7 +43,7 @@ public class CsvReader {
 		
 		Files.lines(path)
 			.parallel()
-			.map( s -> s.split("\\,") )
+			.map( s -> s.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)") )
 			.filter( s -> s.length>maxIndex )
 			.forEach( this::nodeMapper ) 
 			;
@@ -63,7 +63,7 @@ public class CsvReader {
 
 		List<Edge> edges = Files.lines(path)
 			.parallel()
-			.map( s -> s.split("\\,") )
+			.map( s -> s.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)") )
 			.filter( s -> s.length>maxIndex )
 			.map( this::edgeMapper )
 			.reduce( new ArrayList<Edge>(), (a,b) -> { a.addAll(b) ; return a ; } )
