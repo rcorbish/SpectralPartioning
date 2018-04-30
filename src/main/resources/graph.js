@@ -1,12 +1,9 @@
 
-function NetworkView( div ) {
+function NetworkGraph( div ) {
 
 	const width = 800 ;
     const height = 600 ;	
-
-	const weightColor = d3.scaleLinear()
-				.domain([-1, 0, 1])
-				.range(["red", "white", "green"]);
+	var simulation 
 
 	var svg = d3.select( div ).append("svg") 
 		.attr("width", '100%')
@@ -56,6 +53,7 @@ function NetworkView( div ) {
 			.enter()
 				.append("line") 
 					.attr( 'class', 'link' )
+					.attr( "stroke", "white" ) 
 			;
 
 		const nodes = svg
@@ -65,11 +63,8 @@ function NetworkView( div ) {
 				.append("circle")
 					.attr( 'class', 'node' )
 					.attr( 'id', function(d) { return d.id } )
-					.attr( "r", function(d) { return 7.5 } ) 
+					.attr( "r", function(d) { return 15 } ) 
 					.attr( "stroke", "none" ) 
-					.attr( "fill", function(d) { 
-						return "white" 
-					}) 
 					.call(d3.drag()
 						.on("start", dragstarted)
 						.on("drag", dragged)
@@ -77,10 +72,11 @@ function NetworkView( div ) {
 			;
 
 
-		tick = function() {
+		this.tick = function() {
 			nodes
 			.attr("cx", function(d) { return d.x; })
 			.attr("cy", function(d) { return d.y; })
+			.attr("fill", function(d) { return d.color; })			
 			;
 
 			links
@@ -91,31 +87,34 @@ function NetworkView( div ) {
 			;
 		}
 		
-		const simulation = d3.forceSimulation()
+		simulation = d3.forceSimulation()
 			.nodes( nodeData )
 			.force( "link", d3.forceLink()
+					.strength( 1 )
 					.links( linkData ) 
 				)
 			.force( "charge", d3.forceManyBody()
-					.strength( -1 ) 
+					.strength( -20 ) 
 				)
 			.force( "center", d3.forceCenter(width/2, height/2) )
 			.force( "collide", d3.forceCollide( 30 ) ) 
-			.force( "x", d3.forceX()
-					.x( function(d) { 
-						return d.fx ; 
-					})
-					.strength( function(d) { return 1 ; } ) 
-				)  
-			.force( "y", d3.forceY()
-					.y( function(d) { 
-						return d.fy  ; 
-					})
-					.strength( function(d) { return 1 ; } ) 
-				)  
-			.on("tick", tick ) 
-			.on("end", tick ) 
+			// .force( "x", d3.forceX()
+			// 		.x( function(d) { 
+			// 			return d.fx ; 
+			// 		})
+			// 		.strength( function(d) { return 1 ; } ) 
+			// 	)  
+			// .force( "y", d3.forceY()
+			// 		.y( function(d) { 
+			// 			return d.fy  ; 
+			// 		})
+			// 		.strength( function(d) { return 1 ; } ) 
+			// 	)  
+			.on("tick", this.tick ) 
+			.on("end", this.tick ) 
 	} // end processData()
 
+	this.resize = function() {
+	}
 }
 	

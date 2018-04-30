@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Spectral Clustering</title>
 <link rel="stylesheet" href="index.css">
-<script src="js/OrbitControls.js"></script>
 <script src="js/d3.min.js"></script>
 <script src="graph.js"></script>
 
@@ -35,20 +34,22 @@
 		const canvas2dClus = document.getElementById("canvas-2d-clus");
 		const eIndex  = document.getElementById("e-index");
 
+		const graph = new NetworkGraph( canvas3d ) 
+
 		function processData() {
 			if (this.status === 200) {
 				responseMessage = JSON.parse(this.responseText);
-
 		
 				if( partitionIndex === undefined ) {
 					partitionIndex = responseMessage.partition ;
 				}
 				
 				canvas3d.width = canvas3d.width ;
-
-				plotValues() ;
-				plotVector() ;
-				plotCluster() ;
+				
+				graph.processData( responseMessage )
+				plotValues() 
+				plotVector() 
+				plotCluster() 
 			}
 		}
 
@@ -70,6 +71,8 @@
 			
 			canvas3d.width = clientWidth ;
 			canvas3d.height = clientHeight ;
+
+			graph.resize()
 			
 			canvas2dVals.width = clientWidth ;
 			canvas2dVals.height = clientHeight ;
@@ -136,8 +139,8 @@
 				eIndex.value = eigenvalueIndex ; 
 			}) ;
 
-			init();
-			resize();
+			init()
+			resize()
 
 			const partition = document.querySelector( "#partition" ) 
 			partition.addEventListener( "click", cutgraph ) ;
@@ -376,9 +379,6 @@
 				ctx.stroke();
 			}
 		}
-
 	</script>
-
-
 </body>
 </html>
