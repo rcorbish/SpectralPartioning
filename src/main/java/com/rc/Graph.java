@@ -37,7 +37,8 @@ public class Graph {
 		int ix[] = new int[size] ;
 		for( int i=0 ; i<size ; i++ ) ix[i] = ixt.get(i) ;
 
-		int E = size * 500  ;
+		int E = size  ;
+
 		List<Edge> edges = new ArrayList<>() ;
 		int group1 = 0 ;
 		int group2 = size / 3  ;

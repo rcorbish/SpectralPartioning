@@ -49,7 +49,7 @@ public class Monitor implements AutoCloseable {
 	public void start() {
 		try {			
 			spark.Spark.port( 8111 ) ;
-			URL mainPage = getClass().getClassLoader().getResource( "Client.html" ) ;
+			URL mainPage = getClass().getClassLoader().getResource( "index.html" ) ;
 			File path = new File( mainPage.getPath() ) ;
 			spark.Spark.staticFiles.externalLocation( path.getParent() ) ;
 			spark.Spark.get( "/data/:" + INDEX_PARAM, this::getData, gson::toJson ) ;
@@ -60,7 +60,6 @@ public class Monitor implements AutoCloseable {
 	}
 
 	/**
-	 * get 1 slice of compressed data, with random shear
 	 * 
 	 */
 	public Object getData(Request req, Response rsp) {
