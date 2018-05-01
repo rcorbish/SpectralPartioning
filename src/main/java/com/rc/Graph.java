@@ -42,7 +42,7 @@ public class Graph {
 		List<Edge> edges = new ArrayList<>() ;
 		int group1 = 0 ;
 		int group2 = size / 3  ;
-		int group3 = 2 * size / 3 ;
+		int group3 = 2 * size / 3 ; 
 		int nodeIndex = 0 ;
 		for (int i = 0; i < E; i++, nodeIndex++ ) {
 			if( nodeIndex>=size ) nodeIndex=0 ;
@@ -63,7 +63,7 @@ public class Graph {
 			edges.add( edge ) ;
 		}
 
-		log.info( "Created {} edges",  size );
+		log.info( "Created {} edges",  E );
 
 		Graph rc = new Graph( size ) ;
 
