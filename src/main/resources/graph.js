@@ -4,6 +4,11 @@ function NetworkGraph( div ) {
 	const width = 800 ;
     const height = 600 ;	
 	var simulation 
+	var lastResponse 
+	var nodeData 
+	var linkData 
+	var nodes 
+	var links 
 
 	var svg = d3.select( div ).append("svg") 
 		.attr("width", '100%')
@@ -29,16 +34,18 @@ function NetworkGraph( div ) {
 
 	this.processData = function( msg ) {
 
-		const nodeData = [] 
-		const linkData = [] 
+		lastResponse = msg 
 
-		const si = responseMessage.eigenvector.map( function(e,i) { return {x:e, i:i } ; } )
+		nodeData = [] 
+		linkData = [] 
+
+		const si = lastResponse.eigenvector.map( function(e,i) { return {x:e, i:i } ; } )
 		  .sort( function(a, b){return a.x-b.x} ) 
 		  .map( function(e) { return e.i ; } )
 		  .slice( 0, msg.partition+1 ) 		
 		
 		for( let i=0 ; i<msg.N ; i++ ) {
-			nodeData.push( { id:i, color:(si.indexOf(i)<0 ? "blue" : "red")  } )
+			nodeData.push( { id:i, color:"white" } )
 		}
 		let x=0 
 		let y=0
@@ -53,7 +60,7 @@ function NetworkGraph( div ) {
 			}
 		}
 
-		const links = svg
+		links = svg
 			.selectAll("line")
 			.data( linkData )
 			.enter()
@@ -62,14 +69,14 @@ function NetworkGraph( div ) {
 					.attr( "stroke", "white" ) 
 			;
 
-		const nodes = svg
+		nodes = svg
 			.selectAll("circle.node")
 			.data( nodeData )
 			.enter()
 				.append("circle")
 					.attr( 'class', 'node' )
 					.attr( 'id', function(d) { return d.id } )
-					.attr( "r", function(d) { return 12 } ) 
+					.attr( "r", function(d) { return 10 } ) 
 					.attr( "stroke", "none" ) 
 					.call(d3.drag()
 						.on("start", dragstarted)
@@ -77,48 +84,54 @@ function NetworkGraph( div ) {
 						.on("end", dragended)) 
 			;
 
+			this.tick = function() {
+				nodes
+				.attr("cx", function(d) { return d.x; })
+				.attr("cy", function(d) { return d.y; })
+				.attr("fill", function(d) { return d.color; })			
+				;
+	
+				links
+				.attr("x1", function(d) { return d.source.x; })
+				.attr("y1", function(d) { return d.source.y; })
+				.attr("x2", function(d) { return d.target.x; })
+				.attr("y2", function(d) { return d.target.y; })
+				;
+			}
+			
+			simulation = d3.forceSimulation()
+				.nodes( nodeData )
+				.force( "link", d3.forceLink()
+						.strength( 1.5 )
+						.links( linkData ) 
+					)
+				.force( "charge", d3.forceManyBody()
+						.strength( -1.5 ) 
+					)
+				.force( "center", d3.forceCenter(width/2, height/2) )
+				.force( "collide", d3.forceCollide( 15 ) ) 
+				.on("tick", this.tick ) 
+				.on("end", this.tick )
 
-		this.tick = function() {
-			nodes
-			.attr("cx", function(d) { return d.x; })
-			.attr("cy", function(d) { return d.y; })
-			.attr("fill", function(d) { return d.color; })			
-			;
-
-			links
-			.attr("x1", function(d) { return d.source.x; })
-			.attr("y1", function(d) { return d.source.y; })
-			.attr("x2", function(d) { return d.target.x; })
-			.attr("y2", function(d) { return d.target.y; })
-			;
-		}
-		
-		simulation = d3.forceSimulation()
-			.nodes( nodeData )
-			.force( "link", d3.forceLink()
-					.strength( 1.5 )
-					.links( linkData ) 
-				)
-			.force( "charge", d3.forceManyBody()
-					.strength( -3 ) 
-				)
-			.force( "center", d3.forceCenter(width/2, height/2) )
-			.force( "collide", d3.forceCollide( 20 ) ) 
-			// .force( "x", d3.forceX()
-			// 		.x( function(d) { 
-			// 			return d.fx ; 
-			// 		})
-			// 		.strength( function(d) { return 1 ; } ) 
-			// 	)  
-			// .force( "y", d3.forceY()
-			// 		.y( function(d) { 
-			// 			return d.fy  ; 
-			// 		})
-			// 		.strength( function(d) { return 1 ; } ) 
-			// 	)  
-			.on("tick", this.tick ) 
-			.on("end", this.tick ) 
+				this.layout( msg.partition )
 	} // end processData()
+
+
+	this.layout = function( partitionIndex ) {
+		simulation.stop()
+
+		const si = lastResponse.eigenvector.map( function(e,i) { return {x:e, i:i } ; } )
+		  .sort( function(a, b){return a.x-b.x} ) 
+		  .map( function(e) { return e.i ; } )
+		  .slice( 0, partitionIndex+1 ) 		
+		
+		for( let i=0 ; i<nodeData.length ; i++ ) {
+			nodeData[i].color = si.indexOf(i)<0 ? "blue" : "red" 
+		}
+
+		simulation.restart();
+ 
+	} // end layout()
 
 	this.resize = function() {
 	}

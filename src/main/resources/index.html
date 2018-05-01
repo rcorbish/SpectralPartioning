@@ -126,7 +126,10 @@
 
 				if( partitionIndex<0 ) partitionIndex = 0 ;
 				if( partitionIndex>=responseMessage.N ) partitionIndex=responseMessage.N - 1 ;
-				getData() ;
+				graph.layout( partitionIndex )
+				plotCluster() ;
+				plotVector() ;
+
 			});
 
 

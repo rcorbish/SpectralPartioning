@@ -54,7 +54,7 @@ public class Graph {
 			float f = random.nextFloat() ; 
 
 			do {
-				if( f < 0.25f ) {
+				if( f < 0.10f ) {
 					edge.to = ix[ random.nextInt( size ) ]  ;
 				} else  {
 					edge.to = ix[ random.nextInt( size/3 ) + g ]  ;
