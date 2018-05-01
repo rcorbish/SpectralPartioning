@@ -37,7 +37,7 @@ public class Graph {
 		int ix[] = new int[size] ;
 		for( int i=0 ; i<size ; i++ ) ix[i] = ixt.get(i) ;
 
-		int E = size  ;
+		int E = size * 3;
 
 		List<Edge> edges = new ArrayList<>() ;
 		int group1 = 0 ;
@@ -54,7 +54,7 @@ public class Graph {
 			float f = random.nextFloat() ; 
 
 			do {
-				if( f < 0.004f ) {
+				if( f < 0.25f ) {
 					edge.to = ix[ random.nextInt( size ) ]  ;
 				} else  {
 					edge.to = ix[ random.nextInt( size/3 ) + g ]  ;
@@ -137,6 +137,8 @@ public class Graph {
 	
 			a = getLaplacian() ;
 			
+//			a = new double[ getAdjacency().length ] ;
+//			System.arraycopy( getAdjacency(), 0, a, 0, a.length ) ; 
 			int lda = N ;
 			double I[] = new double[N*N] ;
 			

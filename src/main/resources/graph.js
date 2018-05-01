@@ -31,19 +31,25 @@ function NetworkGraph( div ) {
 
 		const nodeData = [] 
 		const linkData = [] 
+
+		const si = responseMessage.eigenvector.map( function(e,i) { return {x:e, i:i } ; } )
+		  .sort( function(a, b){return a.x-b.x} ) 
+		  .map( function(e) { return e.i ; } )
+		  .slice( 0, msg.partition+1 ) 		
+		
 		for( let i=0 ; i<msg.N ; i++ ) {
-			nodeData.push( { id:i, color:"blue" } ) 
+			nodeData.push( { id:i, color:(si.indexOf(i)<0 ? "blue" : "red")  } )
 		}
 		let x=0 
 		let y=0
 		for( let i=0 ; i<msg.surface.length ; i++ ) {
+			if( x!==y && msg.surface[i] !== 0 ) {
+				linkData.push( { source: x, target: y } ) 
+			}
 			x++
 			if( x>= msg.N ) {
 				x=0
 				y++
-			}
-			if( x!==y && msg.surface[i] !== 0 ) {
-				linkData.push( { source: x, target: y } ) 
 			}
 		}
 
@@ -63,7 +69,7 @@ function NetworkGraph( div ) {
 				.append("circle")
 					.attr( 'class', 'node' )
 					.attr( 'id', function(d) { return d.id } )
-					.attr( "r", function(d) { return 15 } ) 
+					.attr( "r", function(d) { return 12 } ) 
 					.attr( "stroke", "none" ) 
 					.call(d3.drag()
 						.on("start", dragstarted)
@@ -90,14 +96,14 @@ function NetworkGraph( div ) {
 		simulation = d3.forceSimulation()
 			.nodes( nodeData )
 			.force( "link", d3.forceLink()
-					.strength( 1 )
+					.strength( 1.5 )
 					.links( linkData ) 
 				)
 			.force( "charge", d3.forceManyBody()
-					.strength( -20 ) 
+					.strength( -3 ) 
 				)
 			.force( "center", d3.forceCenter(width/2, height/2) )
-			.force( "collide", d3.forceCollide( 30 ) ) 
+			.force( "collide", d3.forceCollide( 20 ) ) 
 			// .force( "x", d3.forceX()
 			// 		.x( function(d) { 
 			// 			return d.fx ; 

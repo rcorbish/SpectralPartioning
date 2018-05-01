@@ -27,7 +27,8 @@
 		var sortEigenvectors = true ;
 		var eigenvalueIndex = 1 ;
 		var partitionIndex ;
-				
+		var sortOrder = null ;
+	
 		const canvas3d = document.getElementById("canvas-3d");
 		const canvas2dVals = document.getElementById("canvas-2d-vals");
 		const canvas2dVect = document.getElementById("canvas-2d-vect");
@@ -213,7 +214,6 @@
 
 		
 		
-		var sortOrder = null ;
 		function plotVector() {
 		
 			canvas2dVect.width = canvas2dVect.width ;
