@@ -37,7 +37,7 @@ public class Graph {
 		int ix[] = new int[size] ;
 		for( int i=0 ; i<size ; i++ ) ix[i] = ixt.get(i) ;
 
-		int E = size * 3;
+		int E = (int)( size * 1.5 );
 
 		List<Edge> edges = new ArrayList<>() ;
 		int group1 = 0 ;
@@ -180,20 +180,21 @@ public class Graph {
 		System.arraycopy(ev, 0, sev, 0, sev.length );
 		Arrays.sort( sev ) ;
 
-		int rc = 1 ;
-		double mxg = 0.0 ;
-		double mx = sev[0] ;
-		double mn = mx ;
-		for( int i=1 ; i<sev.length ; i++ ) {
-			double grad = sev[i] - sev[i-1] ;
-			if( grad>mxg ) {
-				mxg = grad ;
-				rc = i ;
-				if( mxg > 0.025 ) break ;
+		int numGroups = 1 ;
+		for( int i=0 ; i<sev.length ; i++ ) {
+			if( Math.abs(sev[i]) < 1e-8 ) {
+				numGroups++ ;
 			}
-			//log.info( "{}\t{}", grad, mxg ) ;
 		}
-		log.info( "Partition = {}, dy/dx = {}", rc, mxg ) ;	
+		log.info( "Graph contains {} connected groups", numGroups ) ;
+		log.debug( "Sorted eigs {}", sev ) ;
+		int rc = 0 ;
+		for( rc=0 ; rc<sev.length ; rc++ ) {
+			if( sev[rc] > 0 ) {
+				break ;
+			}
+		}
+		log.info( "Partition = {}", rc ) ;	
 		return rc ;
 	}
 }

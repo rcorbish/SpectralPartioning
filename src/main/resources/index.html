@@ -208,11 +208,11 @@
 			}
 			ctx.fill();
 			
-			document.getElementById( "e-value" ).innerHTML = "&lambda;=" + responseMessage.eigenvalues[eigenvalueIndex].toFixed(4) ;
+			document.getElementById( "e-value" ).innerHTML = "&lambda;=" + responseMessage.eigenvalues[eigenvalueIndex].toFixed(5) ;
 //			document.getElementById( "e-gap" ).innerHTML =  eigenvalueIndex>0 ? ( "gap=" + (responseMessage.eigenvalues[eigenvalueIndex] - responseMessage.eigenvalues[eigenvalueIndex-1]).toFixed(4) ) : "n/a" ;
 
-//			var t =	responseMessage.eigenvector.reduce( function(p,x) { return  p + x*x ; }, 0 ) ; 			
-//			document.getElementById( "e-norm" ).innerHTML =  "|x|=" + Math.sqrt(t)  ;
+			// var t =	responseMessage.eigenvector.reduce( function(p,x) { return  p + x*x ; }, 0 ) ; 			
+			// document.getElementById( "e-norm" ).innerHTML =  "|x|=" + Math.sqrt(t)  ;
 		}
 
 		

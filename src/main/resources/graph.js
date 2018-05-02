@@ -1,9 +1,10 @@
 
 function NetworkGraph( div ) {
 
-	const width = 800 ;
-    const height = 600 ;	
-	var simulation 
+	const width = 800 
+    const height = 600
+    
+	this.simulation  
 	var lastResponse 
 	var nodeData 
 	var linkData 
@@ -34,10 +35,18 @@ function NetworkGraph( div ) {
 
 	this.processData = function( msg ) {
 
-		lastResponse = msg 
+		if( this.simulation ) {
+			this.simulation.stop() 
+		}
 
+		lastResponse = msg 
 		nodeData = [] 
 		linkData = [] 
+
+		const domsvg = svg.node() 
+		while( domsvg.hasChildNodes() ) {
+			domsvg.removeChild( domsvg.lastChild  )
+		}
 
 		const si = lastResponse.eigenvector.map( function(e,i) { return {x:e, i:i } ; } )
 		  .sort( function(a, b){return a.x-b.x} ) 
@@ -99,17 +108,17 @@ function NetworkGraph( div ) {
 				;
 			}
 			
-			simulation = d3.forceSimulation()
+			this.simulation = d3.forceSimulation()
 				.nodes( nodeData )
 				.force( "link", d3.forceLink()
-						.strength( 1.5 )
+						.strength( .8 )
 						.links( linkData ) 
 					)
 				.force( "charge", d3.forceManyBody()
-						.strength( -1.5 ) 
+						.strength( -.8 ) 
 					)
 				.force( "center", d3.forceCenter(width/2, height/2) )
-				.force( "collide", d3.forceCollide( 15 ) ) 
+				.force( "collide", d3.forceCollide( 20 ) ) 
 				.on("tick", this.tick ) 
 				.on("end", this.tick )
 
@@ -118,18 +127,17 @@ function NetworkGraph( div ) {
 
 
 	this.layout = function( partitionIndex ) {
-		simulation.stop()
 
 		const si = lastResponse.eigenvector.map( function(e,i) { return {x:e, i:i } ; } )
 		  .sort( function(a, b){return a.x-b.x} ) 
 		  .map( function(e) { return e.i ; } )
-		  .slice( 0, partitionIndex+1 ) 		
+		  .slice( 0, partitionIndex ) 		
 		
 		for( let i=0 ; i<nodeData.length ; i++ ) {
 			nodeData[i].color = si.indexOf(i)<0 ? "blue" : "red" 
 		}
 
-		simulation.restart();
+		this.simulation.alphaTarget(0.3).restart();
  
 	} // end layout()
 
