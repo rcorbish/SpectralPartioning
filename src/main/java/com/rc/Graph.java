@@ -25,7 +25,7 @@ public class Graph {
 	private final double degree[] ;
 
 
-	public static Graph random( int size ) {
+	public static Graph random( int size, double connectedness ) {
 		
 		log.info( "Creating random Graph of {} x {}", size, size );
 		
@@ -37,7 +37,7 @@ public class Graph {
 		int ix[] = new int[size] ;
 		for( int i=0 ; i<size ; i++ ) ix[i] = ixt.get(i) ;
 
-		int E = (int)( size * 1.5 );
+		int E = (int)( size * connectedness );
 
 		List<Edge> edges = new ArrayList<>() ;
 		int group1 = 0 ;
@@ -167,6 +167,7 @@ public class Graph {
 	
 			assert( info.val == 0 ) ;
 			log.info( "Eigenvectors calculate for {} x {}", N, N ) ;
+			
 		}
 		
 		if( v != null ) {
@@ -180,14 +181,6 @@ public class Graph {
 		System.arraycopy(ev, 0, sev, 0, sev.length );
 		Arrays.sort( sev ) ;
 
-		int numGroups = 1 ;
-		for( int i=0 ; i<sev.length ; i++ ) {
-			if( Math.abs(sev[i]) < 1e-8 ) {
-				numGroups++ ;
-			}
-		}
-		log.info( "Graph contains {} connected groups", numGroups ) ;
-		log.debug( "Sorted eigs {}", sev ) ;
 		int rc = 0 ;
 		for( rc=0 ; rc<sev.length ; rc++ ) {
 			if( sev[rc] > 0 ) {

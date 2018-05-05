@@ -25,7 +25,7 @@
 		var responseMessage  ;
 
 		var sortEigenvectors = true ;
-		var eigenvalueIndex = 1 ;
+		var eigenvalueIndex  ;
 		var partitionIndex ;
 		var sortOrder = null ;
 	
@@ -44,9 +44,12 @@
 				if( partitionIndex === undefined ) {
 					partitionIndex = responseMessage.partition ;
 				}
+				if( eigenvalueIndex === undefined ) {
+					eigenvalueIndex = responseMessage.numGroups 
+					eIndex.value = eigenvalueIndex ;
+				}
 				
 				canvas3d.width = canvas3d.width ;
-				
 				graph.processData( responseMessage )
 				plotValues() 
 				plotVector() 
@@ -59,7 +62,7 @@
 
 		function getData( cut ) {
 			const cutSpec = cut===undefined ? "" : ("?cut=" + cut) ;
-			xhr.open("GET", "/data/" + eigenvalueIndex + cutSpec ) ;
+			xhr.open("GET", "/data/" + (eigenvalueIndex||-1) + cutSpec ) ;
 			xhr.send();
 		}
 
@@ -129,11 +132,9 @@
 				graph.layout( partitionIndex )
 				plotCluster() ;
 				plotVector() ;
-
 			});
 
 
-			eIndex.value = eigenvalueIndex ;
 			eIndex.addEventListener('change', function(evt) {
 				eigenvalueIndex = this.valueAsNumber ;
 				if( eigenvalueIndex<0 ) eigenvalueIndex = 0 ;
@@ -209,7 +210,7 @@
 			ctx.fill();
 			
 			document.getElementById( "e-value" ).innerHTML = "&lambda;=" + responseMessage.eigenvalues[eigenvalueIndex].toFixed(5) ;
-//			document.getElementById( "e-gap" ).innerHTML =  eigenvalueIndex>0 ? ( "gap=" + (responseMessage.eigenvalues[eigenvalueIndex] - responseMessage.eigenvalues[eigenvalueIndex-1]).toFixed(4) ) : "n/a" ;
+			document.getElementById( "e-gap" ).innerHTML = responseMessage.numGroups.toString() + " groups"
 
 			// var t =	responseMessage.eigenvector.reduce( function(p,x) { return  p + x*x ; }, 0 ) ; 			
 			// document.getElementById( "e-norm" ).innerHTML =  "|x|=" + Math.sqrt(t)  ;

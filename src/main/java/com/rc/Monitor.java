@@ -33,10 +33,10 @@ public class Monitor implements AutoCloseable {
 	final Graph graph ;
 	
 
-	public Monitor( int size ) {	
+	public Monitor( int size, double connectedness ) {	
 		gson = new Gson();
 		random = new Random() ;	
-		graph = Graph.random( size ) ;
+		graph = Graph.random( size, connectedness ) ;
 	}
 	
 	public Monitor(Path path, int ... indices ) throws IOException {
@@ -93,13 +93,22 @@ public class Monitor implements AutoCloseable {
 			int N = graph.getN() ;
 			double eigenvectors[] = new double[N*N] ;
 			
-			if( eigenvalueIndex < 0 ) eigenvalueIndex = 0 ;
-			if( eigenvalueIndex >= N ) eigenvalueIndex = N-1 ;
-
 			responseMessage.N = N ;
 			responseMessage.surface = graph.getAdjacency() ;
 			responseMessage.eigenvalues = graph.eigenValues( eigenvectors ) ;
 			responseMessage.eigenvector = new double[N] ;
+
+			responseMessage.numGroups = 0 ;
+			for( int i=0 ; i<responseMessage.eigenvalues.length ; i++ ) {
+				if( Math.abs( responseMessage.eigenvalues[i] ) > 1e-8 ) {
+					break ;
+				}
+				responseMessage.numGroups++ ;	
+			}
+
+			if( eigenvalueIndex < 0 ) eigenvalueIndex = responseMessage.numGroups ;
+			if( eigenvalueIndex >= N ) eigenvalueIndex = responseMessage.numGroups ;
+
 			System.arraycopy(eigenvectors, eigenvalueIndex*N, responseMessage.eigenvector, 0, responseMessage.eigenvector.length );
 			responseMessage.partition = graph.eigenvectorPartition( responseMessage.eigenvector ) ;
 
@@ -120,6 +129,7 @@ public class Monitor implements AutoCloseable {
 	static class ResponseMessage {
 		int N ;
 		int partition ;
+		int numGroups ;
 		double surface[] ;
 		double eigenvalues[] ;
 		double eigenvector[] ;
