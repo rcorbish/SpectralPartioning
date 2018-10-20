@@ -2,7 +2,6 @@ package com.rc;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -154,7 +153,7 @@ public class Graph {
 	
 			// calc optimum workspace size
 			int lwork = -1 ;
-			Dsygv.dsygv(itype, jobz, uplo, N, a, 0, lda, I, 0, 
+			Dsygv.dsygv(itype, jobz, uplo, N, a, 0, lda, I, 0,
 					ldb, w, 0, tmp, 0, -1, info);
 	
 			assert( info.val == 0 ) ;
@@ -167,7 +166,7 @@ public class Graph {
 	
 			assert( info.val == 0 ) ;
 			log.info( "Eigenvectors calculate for {} x {}", N, N ) ;
-			
+
 		}
 		
 		if( v != null ) {
